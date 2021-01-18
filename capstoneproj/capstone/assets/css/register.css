@@ -1,0 +1,54 @@
+body {
+    background: #ddd;
+}
+.container {
+    border-radius: 5px;
+    background: #13232f;
+    padding: 30px;
+    margin-top: 20px;
+    color: white;
+    min-height: 100px;
+    max-width: 500px;
+}
+.switchForms {
+    width: 50%;
+    float: left;
+    border-radius: 0px;
+    background: rgba(160, 179, 176, 0.25);
+    border: 1px solid rgba(160, 179, 176, 0.25);
+}
+.switchForms:hover, .getStarted:hover {
+    background: #19a881;
+    border: 1px solid #19a881;
+}
+.getStarted {
+    width: 100%;
+    border-radius: 0px;
+    background: #1ab188;
+    border: 1px solid #1ab188
+}
+.active {
+    background: #1ab188!important;
+    border: 1px solid #1ab188!important;
+}
+form {
+    padding-top: 0px
+}
+.form-control, .form-control:focus {
+    background: #13232f;
+    color: #eee;
+}
+.form-control:focus {
+    color: white
+}
+.show {
+    display: block;
+}
+.hide {
+    display: none;
+}
+.alert-danger > ul {
+    list-style-type: none;
+    margin-bottom: 0px;
+    padding-left: 0px;
+}
