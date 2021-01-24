@@ -17,6 +17,7 @@ from django.contrib import admin
 from django.urls import path
 from . import views
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+from .views import VerificationView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -24,6 +25,7 @@ urlpatterns = [
     path('login/', views.loginPage, name='login'),
     path('logout/', views.logoutUser, name='logout'),
     path('', views.dashboard, name='dashboard'),
+    path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate")
 ]
 
 urlpatterns += staticfiles_urlpatterns()
