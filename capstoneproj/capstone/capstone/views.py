@@ -13,6 +13,8 @@ from .forms import CreateUserForm
 from .utils import token_generator
 from django.views import View
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from .forms import CreateUserForm, UpdateInfoForm
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -35,6 +37,7 @@ class VerificationView(View):
 
 
         return redirect('login')
+
 
 def register(request):
     form = CreateUserForm()
@@ -98,3 +101,17 @@ def logoutUser(request):
 def dashboard(request):
     context = {}
     return render(request, 'dashboard.html', context)
+
+@login_required(login_url='login')
+def updateinfo(request):
+    form = UpdateInfoForm()
+    if request.method == 'POST':
+        form = UpdateInfoForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account information has been updated')
+            return redirect('../')
+    else:
+        form = UpdateInfoForm(instance=request.user)
+    context = {'form': form}
+    return render(request, 'updateinfo.html', context)

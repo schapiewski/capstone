@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  {% load crispy_forms_tags %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
@@ -36,8 +37,6 @@
     </form>
   </div>
 </nav>
-<h1>Welcome to our app, {{request.user}}!</h1>
-
 <body>
 <div class="container-fluid">
   <div class="row">
@@ -45,12 +44,13 @@
       <div class="position-sticky pt-3">
         <ul class="nav flex-column">
           <li class="nav-item">
-            <a class="nav-link active" aria-current="page" href="{% url 'dashboard' %}">
+            <a class="nav-link" href="{% url 'dashboard' %}">
+              <span data-feather="home"></span>
               Portfolio
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{% url 'updateinfo' %}">
+            <a class="nav-link active" aria-current="page" href="{% url 'updateinfo' %}">
               Update Profile
             </a>
           </li>
@@ -78,44 +78,15 @@
       </div>
     </nav>
 
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-      <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
-      <h2>Your Portfolio</h2>
-      <div class="table-responsive">
-        <table class="table table-striped table-sm">
-          <thead>
-          <tr>
-            <th>Symbol</th>
-            <th>Open</th>
-            <th>High</th>
-            <th>Low</th>
-            <th>52-wk high</th> <!-- add more columns -->
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-            <td>TSLA</td>
-            <td>999</td>
-            <td>999</td>
-            <td>999</td>
-            <td>999</td>
-          </tr>
-          <tr>
-            <td>AAPL</td>
-            <td>999</td>
-            <td>999</td>
-            <td>999</td>
-            <td>999</td>
-          </tr>
-          <tr>
-            <td>AMZN</td>
-            <td>999</td>
-            <td>999</td>
-            <td>999</td>
-            <td>999</td>
-          </tr>
-          </tbody>
-        </table>
+    <main>
+      <div>
+        <form class = "update-form" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            {{form|crispy}}
+          </div>
+          <button type="submit" class="btn btn-primary getStarted">Update Info</button>
+        </form>
       </div>
     </main>
   </div>

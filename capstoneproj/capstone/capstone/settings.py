@@ -31,6 +31,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -127,10 +128,10 @@ STATICFILES_DIRS = (
 )
 
 #Email Configuration for Account Activation
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '' #os.environ.get('test')
-EMAIL_HOST_PASSWORD = '' #os.environ.get('test')
-
+EMAIL_HOST_USER = 'StockMarketRecommender' #gmail account for sending password reset
+EMAIL_HOST_PASSWORD = 'TuDytE3P5AwTTEu'
