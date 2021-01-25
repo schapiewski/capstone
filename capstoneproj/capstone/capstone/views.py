@@ -3,10 +3,9 @@ from django.http import HttpResponse
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
-
 from django.contrib.auth.decorators import login_required
 
-from .forms import CreateUserForm
+from .forms import CreateUserForm, UpdateInfoForm
 
 def register(request):
     form = CreateUserForm()
@@ -43,3 +42,17 @@ def logoutUser(request):
 def dashboard(request):
     context = {}
     return render(request, 'dashboard.html', context)
+
+@login_required(login_url='login')
+def updateinfo(request):
+    form = UpdateInfoForm()
+    if request.method == 'POST':
+        form = UpdateInfoForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account information has been updated')
+            return redirect('../')
+    else:
+        form = UpdateInfoForm(instance=request.user)
+    context = {'form': form}
+    return render(request, 'updateinfo.html', context)
