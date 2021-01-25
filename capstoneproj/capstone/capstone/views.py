@@ -4,15 +4,15 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
 from django.core.mail import EmailMessage
-from django.contrib.auth.decorators import login_required
 from django.utils.encoding import force_bytes, force_text, DjangoUnicodeDecodeError
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.contrib.sites.shortcuts import get_current_site
 from django.urls import reverse
-from .forms import CreateUserForm
 from .utils import token_generator
 from django.views import View
 from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required
+from .forms import CreateUserForm, UpdateInfoForm
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -98,3 +98,17 @@ def logoutUser(request):
 def dashboard(request):
     context = {}
     return render(request, 'dashboard.html', context)
+
+@login_required(login_url='login')
+def updateinfo(request):
+    form = UpdateInfoForm()
+    if request.method == 'POST':
+        form = UpdateInfoForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Account information has been updated')
+            return redirect('../')
+    else:
+        form = UpdateInfoForm(instance=request.user)
+    context = {'form': form}
+    return render(request, 'updateinfo.html', context)
