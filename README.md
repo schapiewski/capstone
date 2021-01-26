@@ -27,3 +27,5 @@ When grabbing project from github:
 8) Set working directory (Ex: C:\Users\<user>\Documents\GitHub\capstone\capstoneproj\capstone)
 9) Now the play button should run a local server on your computer and you can now view the app
 
+## QA Testing: https://github.com/dkkocab/capstone_QATesting 
+
