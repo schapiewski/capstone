@@ -1,4 +1,4 @@
-#!c:\users\shawn\pycharmprojects\capstoneproj\venv\scripts\python.exe
+#!C:\Users\Shawn\Documents\GitHub\capstone\capstoneproj\venv\Scripts\python.exe
 # When the django-admin.py deprecation ends, remove this script.
 import warnings
 

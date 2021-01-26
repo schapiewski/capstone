@@ -34,6 +34,13 @@
                     </button>
                 {% endif %}
                 {% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    {{message}}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                {% endif %}
+                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     {{message}}
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -52,6 +59,9 @@
               </div>
               <button type="submit" class="btn btn-primary getStarted" name="Create User">Log In</button>
           </form>
+          <a class="nav-link" href="../password-reset/">Forgot Password?</a>
         </div>
       </div>
+      </div>
   </body>
+</html>
