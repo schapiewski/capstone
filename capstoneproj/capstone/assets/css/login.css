@@ -23,9 +23,9 @@ body {
 }
 .getStarted {
     width: 100%;
-    border-radius: 0px;
+    border-radius: 2px;
     background: #1ab188;
-    border: 1px solid #1ab188
+    border: 1px solid #1ab188;
 }
 .active {
     background: #1ab188!important;

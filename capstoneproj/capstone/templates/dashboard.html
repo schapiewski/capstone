@@ -1,14 +1,19 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
-    <title>dashboard</title>
-      <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  </head>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+  <title>dashboard</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+  {% load static %}
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link href="/docs/5.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
+</head>
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
   <a class="navbar-brand" href="#">Navbar</a>
@@ -31,5 +36,91 @@
     </form>
   </div>
 </nav>
-
 <h1>Welcome to our app, {{request.user}}!</h1>
+
+<body>
+<div class="container-fluid">
+  <div class="row">
+    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+      <div class="position-sticky pt-3">
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a class="nav-link active" aria-current="page" href="{% url 'dashboard' %}">
+              Portfolio
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'updateinfo' %}">
+              Update Profile
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'password_reset' %}">
+              Reset Password
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              Placeholder
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              Placeholder
+            </a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#">
+              Placeholder
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+      <canvas class="my-4 w-100" id="myChart" width="900" height="380"></canvas>
+      <h2>Your Portfolio</h2>
+      <div class="table-responsive">
+        <table class="table table-striped table-sm">
+          <thead>
+          <tr>
+            <th>Symbol</th>
+            <th>Open</th>
+            <th>High</th>
+            <th>Low</th>
+            <th>52-wk high</th> <!-- add more columns -->
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>TSLA</td>
+            <td>999</td>
+            <td>999</td>
+            <td>999</td>
+            <td>999</td>
+          </tr>
+          <tr>
+            <td>AAPL</td>
+            <td>999</td>
+            <td>999</td>
+            <td>999</td>
+            <td>999</td>
+          </tr>
+          <tr>
+            <td>AMZN</td>
+            <td>999</td>
+            <td>999</td>
+            <td>999</td>
+            <td>999</td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="/docs/5.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+</body>
+</html>
