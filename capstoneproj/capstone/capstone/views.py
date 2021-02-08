@@ -15,6 +15,11 @@ from django.views import View
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import CreateUserForm, UpdateInfoForm
+from .models import Stock
+from .forms import StockForm
+from .fusioncharts import FusionCharts
+from .fusioncharts import FusionTable
+from .fusioncharts import TimeSeries
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -99,8 +104,18 @@ def logoutUser(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    context = {}
-    return render(request, 'dashboard.html', context)
+    import requests
+    import json
+    if request.method == 'POST':
+        ticker = request.POST['ticker']
+        api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + ticker + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
+        try:
+            api = json.loads(api_request.content)
+        except Exception as e:
+            api = "Error..."
+        return render(request, 'dashboard.html', {'api': api})
+    else:
+        return render(request, 'dashboard.html', {'ticker': "Enter a Ticker Symbol Above..."})
 
 @login_required(login_url='login')
 def updateinfo(request):
@@ -115,3 +130,37 @@ def updateinfo(request):
         form = UpdateInfoForm(instance=request.user)
     context = {'form': form}
     return render(request, 'updateinfo.html', context)
+
+@login_required(login_url='login')
+def add_stock(request):
+    import requests
+    import json
+    if request.method == 'POST':
+        form = StockForm(request.POST or None)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Stock has been Added!")
+            return redirect('add_stock')
+    else:
+
+        ticker = Stock.objects.all()
+        output = []
+        for ticker_item in ticker:
+            api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
+            try:
+                api = json.loads(api_request.content)
+                output.append(api)
+            except Exception as e:
+                api = "Error..."
+
+        return render(request, 'add_stock.html', {'ticker': ticker, 'output': output})
+
+@login_required(login_url='login')
+def delete(request, stock_id):
+
+	item = Stock.objects.get(pk=stock_id)
+	item.delete()
+	messages.success(request, ("Stock Has Been Deleted!"))
+	return redirect(add_stock)
+
