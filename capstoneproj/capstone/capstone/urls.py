@@ -26,8 +26,9 @@ urlpatterns = [
     path('login/', views.loginPage, name='login'),
     path('logout/', views.logoutUser, name='logout'),
     path('updateinfo/', views.updateinfo, name='updateinfo'),
-    path('add_stock.html', views.add_stock, name="add_stock"),
-    path('delete/<stock_id>', views.delete, name="delete"),
+    path('show_graph/', views.show_stock_graph, name="show_graph"),
+    # path('add_stock.html', views.add_stock, name="add_stock"),
+    # path('delete/<stock_id>', views.delete, name="delete"),
 
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='templates/password_reset/password_reset.html'), name='password_reset'),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='templates/password_reset/password_reset_done.html'), name='password_reset_done'),
