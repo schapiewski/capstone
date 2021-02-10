@@ -21,6 +21,15 @@ from .fusioncharts import FusionCharts
 from .fusioncharts import FusionTable
 from .fusioncharts import TimeSeries
 
+import pandas as pd
+from alpha_vantage.timeseries import TimeSeries
+import plotly.graph_objects as go
+from plotly.offline import plot
+import requests
+from alpha_vantage.techindicators import TechIndicators
+import datetime
+
+
 class VerificationView(View):
     def get(self, request, uidb64, token):
         try:
@@ -104,18 +113,19 @@ def logoutUser(request):
 
 @login_required(login_url='login')
 def dashboard(request):
-    import requests
-    import json
-    if request.method == 'POST':
-        ticker = request.POST['ticker']
-        api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + ticker + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
-        try:
-            api = json.loads(api_request.content)
-        except Exception as e:
-            api = "Error..."
-        return render(request, 'dashboard.html', {'api': api})
-    else:
-        return render(request, 'dashboard.html', {'ticker': "Enter a Ticker Symbol Above..."})
+    return render(request, 'dashboard.html')
+    # import requests
+    # import json
+    # if request.method == 'POST':
+    #     ticker = request.POST['ticker']
+    #     api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + ticker + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
+    #     try:
+    #         api = json.loads(api_request.content)
+    #     except Exception as e:
+    #         api = "Error..."
+    #     return render(request, 'dashboard.html', {'api': api})
+    # else:
+    #     return render(request, 'dashboard.html', {'ticker': "Enter a Ticker Symbol Above..."})
 
 @login_required(login_url='login')
 def updateinfo(request):
@@ -131,36 +141,149 @@ def updateinfo(request):
     context = {'form': form}
     return render(request, 'updateinfo.html', context)
 
-@login_required(login_url='login')
-def add_stock(request):
-    import requests
-    import json
+def show_stock_graph(request):
+    api_key = 'I2CGXL68P1CJ9XNP'
     if request.method == 'POST':
-        form = StockForm(request.POST or None)
+        if len(request.POST['stock']) > 2 and len(request.POST['stock']) < 6:
+            stock = request.POST['stock']
+            ts = TimeSeries(key=api_key, output_format='pandas')
+            data_ts, meta_data_ts = ts.get_daily(symbol=stock)
 
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Stock has been Added!")
-            return redirect('add_stock')
+            ti = TimeSeries(key=api_key, output_format='pandas')
+            data_ti, meta_data_ti = ti.get_daily(symbol=stock)
+
+            ts_df = data_ts
+            ti_df = data_ti
+
+            payload = {'function': 'OVERVIEW', 'symbol': stock, 'apikey': 'YX9741BHQFXIYA0B'}
+            r = requests.get('https://www.alphavantage.co/query', params=payload)
+            r = r.json()
+            print(r)
+
+            def candlestick():
+                figure = go.Figure(
+                    data=[
+                        go.Candlestick(
+                            x=ts_df.index,
+                            high=ts_df['2. high'],
+                            low=ts_df['3. low'],
+                            open=ts_df['1. open'],
+                            close=ts_df['4. close'],
+                        )
+                    ]
+                )
+                candlestick_div = plot(figure, output_type='div')
+                return candlestick_div
+
+            print(r['Sector'])
+            stockName = r['Name']
+            sector = r['Sector']
+            marketcap = r['MarketCapitalization']
+            peratio = r['PERatio']
+            yearhigh = r['52WeekHigh']
+            yearlow = r['52WeekLow']
+            eps = r['EPS']
+
+            timeseries = ts_df.to_dict(orient='records')
+            closingprice = []
+            for k in timeseries:
+                closingprice.append(k['4. close'])
+            lowprice = []
+            for k in timeseries:
+                closingprice.append(k['3. low'])
+            highprice = []
+            for k in timeseries:
+                closingprice.append(k['2. high'])
+            openprice = []
+            for k in timeseries:
+                closingprice.append(k['1. open'])
+            pricedata = {
+                'close': [closingprice],
+                'open': [openprice],
+                'high': [highprice],
+                'low': [lowprice],
+            }
+            # miscellaneous stuff
+            day = datetime.datetime.now()
+            day = day.strftime("%A")
+
+            def human_format(num):
+                magnitude = 0
+                while abs(num) >= 1000:
+                    magnitude += 1
+                    num /= 1000.0
+                # add more suffixes if you need them
+                return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+
+            marketcap = int(marketcap)
+            marketcap = human_format(marketcap)
+            closingprice = closingprice[0:15]
+            currentPrice = closingprice[0]
+            previousClosingPrice = closingprice[1]
+            priceChange = closingprice[0] - closingprice[1]
+            decimalChange = closingprice[0] / closingprice[1]
+            PosNegChange = decimalChange - 1
+            percentageChange = PosNegChange * 100
+
+            context = {
+                'sector': sector,
+                'marketcap': marketcap,
+                'peratio': peratio,
+                'yearhigh': yearhigh,
+                'yearlow': yearlow,
+                'eps': eps,
+                'closingprice': closingprice,
+                'openprice': openprice,
+                'highprice': highprice,
+                'lowprice': lowprice,
+                'pricedata': pricedata,
+                'timeseries': timeseries,
+                'stock': stock,
+                'day': day,
+                'stockName': stockName,
+                'currentPrice': currentPrice,
+                'percentageChange': round(percentageChange, 2),
+                'previousClosingPrice': previousClosingPrice,
+                'priceChange': round(abs(priceChange), 2),
+                'candlestick': candlestick(),
+            }
+            return render(request, 'show_graph.html', context)
+        else:
+            context = {
+                'incorrectString': True,
+            }
+            return render(request, 'show_graph.html', context)
     else:
+        return render(request, 'show_graph.html')
 
-        ticker = Stock.objects.all()
-        output = []
-        for ticker_item in ticker:
-            api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
-            try:
-                api = json.loads(api_request.content)
-                output.append(api)
-            except Exception as e:
-                api = "Error..."
 
-        return render(request, 'add_stock.html', {'ticker': ticker, 'output': output})
+# @login_required(login_url='login')
+# def add_stock(request):
+#     if request.method == 'POST':
+#         form = StockForm(request.POST or None)
+#
+#         if form.is_valid():
+#             form.save()
+#             messages.success(request, "Stock has been Added!")
+#             return redirect('add_stock')
+#     else:
+#
+#         ticker = Stock.objects.all()
+#         output = []
+#         for ticker_item in ticker:
+#             api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
+#             try:
+#                 api = json.loads(api_request.content)
+#                 output.append(api)
+#             except Exception as e:
+#                 api = "Error..."
+#         return render(request, 'add_stock.html', {'ticker': ticker, 'output': output})
 
-@login_required(login_url='login')
-def delete(request, stock_id):
-
-	item = Stock.objects.get(pk=stock_id)
-	item.delete()
-	messages.success(request, ("Stock Has Been Deleted!"))
-	return redirect(add_stock)
+# @login_required(login_url='login')
+# def delete(request, stock_id):
+#
+# 	item = Stock.objects.get(pk=stock_id)
+# 	item.delete()
+# 	messages.success(request, ("Stock Has Been Deleted!"))
+# 	return redirect(add_stock)
 
