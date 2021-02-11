@@ -27,6 +27,9 @@ urlpatterns = [
     path('logout/', views.logoutUser, name='logout'),
     path('updateinfo/', views.updateinfo, name='updateinfo'),
     path('show_graph/', views.show_stock_graph, name="show_graph"),
+    path('pricing/', views.pricing, name='pricing'),
+    path('sector_form/', views.sectorForm, name='sector_form'),
+
     # path('add_stock.html', views.add_stock, name="add_stock"),
     # path('delete/<stock_id>', views.delete, name="delete"),
 

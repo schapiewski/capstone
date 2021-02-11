@@ -16,7 +16,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from .forms import CreateUserForm, UpdateInfoForm
 from .models import Stock
-from .forms import StockForm
+from .forms import StockForm, PackageForm
 from .fusioncharts import FusionCharts
 from .fusioncharts import FusionTable
 from .fusioncharts import TimeSeries
@@ -255,6 +255,51 @@ def show_stock_graph(request):
             return render(request, 'show_graph.html', context)
     else:
         return render(request, 'show_graph.html')
+
+def pricing(request):
+    return render(request, 'pricing.html')
+
+def sectorForm(request):
+    print(request.POST)
+    info = [None, None, None]
+    sectorList = ['Energy', 'Materials', 'Industrials', 'Consumer Discretionary', 'Consumer Staples', 'Health Care',
+                  'Financials', 'Information Technology', 'Telecommunication Services', 'Utilities', 'Real Estate']
+    packages = {'Starter' : '1', 'Deluxe' : '2', 'Ultimate': '3'}
+    if request.method == 'POST':
+        info[0] = request.POST['sector']
+        print(info[0])
+        if request.POST['package'] == 'starter':
+            info[1] = packages['Starter']
+        elif request.POST['package'] == 'deluxe':
+            info[1] = packages['Deluxe']
+        elif request.POST['package'] == 'ultimate':
+            info[1] = packages['Ultimate']
+        info[2] = 'Includes ' + info[1] + ' tickers supported by our recommendation system'
+
+    print({'info': info})
+    return render(request, 'sector_form.html', {'info': info})
+
+
+
+    # form = PackageForm()
+    # if request.method == 'POST':
+    #     form = PackageForm(request.POST, instance=request.user)
+    #     if form.is_valid():
+    #         form.save()
+    #         messages.success(request, 'Account information has been updated')
+    #         return redirect('../')
+    # else:
+    #     form = UpdateInfoForm(instance=request.user)
+    # context = {'form': form}
+    # return render(request, 'updateinfo.html', context)
+    #
+    # return render(request, 'sector_form.html', {'info': info,})
+
+
+
+
+
+
 
 
 # @login_required(login_url='login')
