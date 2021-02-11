@@ -262,8 +262,6 @@ def pricing(request):
 def sectorForm(request):
     print(request.POST)
     info = [None, None, None]
-    sectorList = ['Energy', 'Materials', 'Industrials', 'Consumer Discretionary', 'Consumer Staples', 'Health Care',
-                  'Financials', 'Information Technology', 'Telecommunication Services', 'Utilities', 'Real Estate']
     packages = {'Starter' : '1', 'Deluxe' : '2', 'Ultimate': '3'}
     if request.method == 'POST':
         info[0] = request.POST['sector']
@@ -278,28 +276,6 @@ def sectorForm(request):
 
     print({'info': info})
     return render(request, 'sector_form.html', {'info': info})
-
-
-
-    # form = PackageForm()
-    # if request.method == 'POST':
-    #     form = PackageForm(request.POST, instance=request.user)
-    #     if form.is_valid():
-    #         form.save()
-    #         messages.success(request, 'Account information has been updated')
-    #         return redirect('../')
-    # else:
-    #     form = UpdateInfoForm(instance=request.user)
-    # context = {'form': form}
-    # return render(request, 'updateinfo.html', context)
-    #
-    # return render(request, 'sector_form.html', {'info': info,})
-
-
-
-
-
-
 
 
 # @login_required(login_url='login')
