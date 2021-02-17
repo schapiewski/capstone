@@ -108,6 +108,7 @@ h1 {
 }
 
 .card{
+  color: white;
   background-color: #13232f;
   box-shadow: 10px 10px 15px black;
 }
@@ -135,6 +136,7 @@ h1,h2{
 }
 .display-2{
   background-color:#13232f;
+  font-size: 5.5vw!important;
 }
 
 .alert{
@@ -148,15 +150,24 @@ h1,h2{
 label{
   color: whitesmoke
 }
-.content-mobile {
-  display: none;
-}
 
-@media only screen and (max-width: 768px) {
-  .content-mobile {
-    display: block;
-  }
-}
 .currentPrice{
     color: whitesmoke;
+}
+
+#bg-color {
+    background-color: #13232F;
+}
+.btn-outline-success {
+    color: #1ab188!important;
+    border-color: #1ab188!important;
+}
+.btn-outline-success:hover {
+    color: #fff!important;
+    background-color: #1ab188!important;
+    border-color: #1ab188!important;
+}
+
+.alert-info {
+    border-color: transparent!important;
 }

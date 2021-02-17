@@ -47,7 +47,7 @@
   {% endif %}
 
 <div class='container-fluid'>
-    <div class="content-mobile">
+    <div class="content-mobile d-md-block d-lg-none">
       <form action="{% url 'show_graph' %}" class="form-inline my-2 my-lg-0" method="POST">
         {% csrf_token %}
         <input class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock">
