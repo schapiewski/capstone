@@ -47,18 +47,20 @@
   {% endif %}
 
 <div class='container-fluid'>
-  <form action="{% url 'show_graph' %}" class="form-inline my-2 my-lg-0" method="POST">
-    {% csrf_token %}
-    <input class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock">
-    <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
- </form>
+    <div class="content-mobile">
+      <form action="{% url 'show_graph' %}" class="form-inline my-2 my-lg-0" method="POST">
+        {% csrf_token %}
+        <input class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock">
+        <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+      </form>
+    </div>
 
 
 
 
 {% if stock %}
   <div class='row justify-content-center text-center my-4'>
-    <div class="col-sm-12 col-lg-12 col-xl-12 col-md-12">
+    <div class="col-sm-12 col-lg-12 col-xl-12 col-md-12" id="stockName">
       <div class="alert alert-info text-center" role="alert">
         <h1 class="display-2">{{stockName}}</h1>
       </div>
