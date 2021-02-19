@@ -20,7 +20,7 @@ from .forms import StockForm, PackageForm
 from .fusioncharts import FusionCharts
 from .fusioncharts import FusionTable
 from .fusioncharts import TimeSeries
-
+import time
 import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
 import plotly.graph_objects as go
@@ -28,6 +28,7 @@ from plotly.offline import plot
 import requests
 from alpha_vantage.techindicators import TechIndicators
 import datetime
+from .models import Ticker
 
 
 class VerificationView(View):
@@ -149,16 +150,15 @@ def show_stock_graph(request):
             ts = TimeSeries(key=api_key, output_format='pandas')
             data_ts, meta_data_ts = ts.get_daily(symbol=stock)
 
-            ti = TimeSeries(key=api_key, output_format='pandas')
-            data_ti, meta_data_ti = ti.get_daily(symbol=stock)
+            #ti = TimeSeries(key=api_key, output_format='pandas')
+            #data_ti, meta_data_ti = ti.get_daily(symbol=stock)
 
             ts_df = data_ts
-            ti_df = data_ti
+            #ti_df = data_ti
 
             payload = {'function': 'OVERVIEW', 'symbol': stock, 'apikey': 'YX9741BHQFXIYA0B'}
             r = requests.get('https://www.alphavantage.co/query', params=payload)
             r = r.json()
-            print(r)
 
             def candlestick():
                 figure = go.Figure(
@@ -175,7 +175,6 @@ def show_stock_graph(request):
                 candlestick_div = plot(figure, output_type='div')
                 return candlestick_div
 
-            print(r['Sector'])
             stockName = r['Name']
             sector = r['Sector']
             marketcap = r['MarketCapitalization']
@@ -225,8 +224,16 @@ def show_stock_graph(request):
             PosNegChange = decimalChange - 1
             percentageChange = PosNegChange * 100
 
+            # Pulling from Database
+            try:
+                currentPrice2 = Ticker.objects.get(ticker=stock).current_price
+            except:
+                currentPrice2 = 'Doesnt Exist'
+
+
             context = {
                 'sector': sector,
+                'currentPrice2': currentPrice2,
                 'marketcap': marketcap,
                 'peratio': peratio,
                 'yearhigh': yearhigh,
@@ -308,3 +315,94 @@ def sectorForm(request):
 # 	messages.success(request, ("Stock Has Been Deleted!"))
 # 	return redirect(add_stock)
 
+@login_required(login_url='login')
+def UpdateDatabase(request):
+    # I2CGXL68P1CJ9XNP
+    # YX9741BHQFXIYA0B
+    api_key = 'AYB32JWT41PK80BR'
+    tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL']
+    for f in range(4, 6):
+        ts = TimeSeries(key=api_key, output_format='pandas')
+        data_ts, meta_data_ts = ts.get_daily(symbol=tag_list[f])
+
+        ts_df = data_ts
+
+        payload = {'function': 'OVERVIEW', 'symbol': tag_list[f], 'apikey': 'YX9741BHQFXIYA0B'}
+        r = requests.get('https://www.alphavantage.co/query', params=payload)
+        r = r.json()
+        stockName = r['Name']
+        sector = r['Sector']
+        marketcap = r['MarketCapitalization']
+        peratio = r['PERatio']
+        yearhigh = r['52WeekHigh']
+        yearlow = r['52WeekLow']
+        eps = r['EPS']
+
+        timeseries = ts_df.to_dict(orient='records')
+        closingprice = []
+        for k in timeseries:
+            closingprice.append(k['4. close'])
+        lowprice = []
+        for k in timeseries:
+            closingprice.append(k['3. low'])
+        highprice = []
+        for k in timeseries:
+            closingprice.append(k['2. high'])
+        openprice = []
+        for k in timeseries:
+            closingprice.append(k['1. open'])
+        pricedata = {
+            'close': [closingprice],
+            'open': [openprice],
+            'high': [highprice],
+            'low': [lowprice],
+        }
+        # miscellaneous stuff
+        day = datetime.datetime.now()
+        day = day.strftime("%A")
+
+        def human_format(num):
+            magnitude = 0
+            while abs(num) >= 1000:
+                magnitude += 1
+                num /= 1000.0
+            # add more suffixes if you need them
+            return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+
+        marketcap = int(marketcap)
+        marketcap = human_format(marketcap)
+        closingprice = closingprice[0:15]
+        currentPrice = closingprice[0]
+        previousClosingPrice = closingprice[1]
+        priceChange = closingprice[0] - closingprice[1]
+        decimalChange = closingprice[0] / closingprice[1]
+        PosNegChange = decimalChange - 1
+        percentageChange = PosNegChange * 100
+        print(f, tag_list[f])
+        try:
+            test = Ticker.objects.get(ticker=tag_list[f])
+            print('Updating ', stockName, '...')
+            test.stock_name = stockName
+            test.sector = sector
+            test.market_cap = marketcap
+            test.current_price = currentPrice
+            test.previous_closing_price = previousClosingPrice
+            test.percentage_change = percentageChange
+            test.year_high = yearhigh
+            test.year_low = yearlow
+            test.price_change = priceChange
+            test.save()
+            print('Updated: ', stockName)
+        except:
+            print("Creating ", stockName, "...")
+            test = Ticker(ticker=tag_list[f], stock_name=stockName, sector=sector, market_cap=marketcap,
+                          current_price=currentPrice, previous_closing_price=previousClosingPrice,
+                          percentage_change=percentageChange, year_high=yearhigh, year_low=yearlow,
+                          price_change=priceChange)
+            print("Saving ", test.stock_name, " to the Database...")
+            test.save()
+
+        if f % 2 == 0:
+            time.sleep(70)
+    print("Finished")
+    return render(request, 'update_database.html')
