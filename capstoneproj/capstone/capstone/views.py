@@ -159,7 +159,8 @@ def show_stock_graph(request):
             payload = {'function': 'OVERVIEW', 'symbol': stock, 'apikey': 'YX9741BHQFXIYA0B'}
             r = requests.get('https://www.alphavantage.co/query', params=payload)
             r = r.json()
-
+            print(ts_df.index[0:15])
+            print(ts_df['1. open'][0:15])
             def candlestick():
                 figure = go.Figure(
                     data=[
@@ -321,7 +322,7 @@ def UpdateDatabase(request):
     # YX9741BHQFXIYA0B
     api_key = 'AYB32JWT41PK80BR'
     tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL']
-    for f in range(4, 6):
+    for f in range(5, 6):
         ts = TimeSeries(key=api_key, output_format='pandas')
         data_ts, meta_data_ts = ts.get_daily(symbol=tag_list[f])
 
@@ -330,6 +331,37 @@ def UpdateDatabase(request):
         payload = {'function': 'OVERVIEW', 'symbol': tag_list[f], 'apikey': 'YX9741BHQFXIYA0B'}
         r = requests.get('https://www.alphavantage.co/query', params=payload)
         r = r.json()
+
+        def candlestick():
+            figure = go.Figure(
+                data=[
+                    go.Candlestick(
+                        x=ts_df.index,
+                        high=ts_df['2. high'],
+                        low=ts_df['3. low'],
+                        open=ts_df['1. open'],
+                        close=ts_df['4. close'],
+                    )
+                ]
+            )
+            candlestick_div = plot(figure, output_type='div')
+            return candlestick_div
+        test = []
+        for s in ts_df['2. high'][0:7].values:
+            print(s)
+        print("------------------------------------------------------")
+        print(ts_df)
+        print("------------------------------------------------------")
+        print("how to pull range of closing price numbers")
+        print("Most recent 8 closing price numbers: high=ts_df['2. high'][0:8].values\n", ts_df['2. high'][0])
+        # print("test\n", test[0])
+        print("------------------------------------------------------")
+        print("ts_df type: ", type(ts_df))
+        print("ts_df.index type: ", type(ts_df.index))
+        print("ts_df.index\n", ts_df.index)
+        print("ts_df.index[0:2]\n", ts_df.index[0:2])
+        print("ts_df['2. high']\n", ts_df['2. high'])
+        print("ts_df['2. high'][0:2]\n", ts_df['2. high'][0:2])
         stockName = r['Name']
         sector = r['Sector']
         marketcap = r['MarketCapitalization']
@@ -402,7 +434,7 @@ def UpdateDatabase(request):
             print("Saving ", test.stock_name, " to the Database...")
             test.save()
 
-        if f % 2 == 0:
+        if f % 3 == 0:
             time.sleep(70)
     print("Finished")
     return render(request, 'update_database.html')
