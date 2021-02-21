@@ -29,6 +29,7 @@ import requests
 from alpha_vantage.techindicators import TechIndicators
 import datetime
 from .models import Ticker
+import pandas as pd
 
 
 class VerificationView(View):
@@ -145,118 +146,108 @@ def updateinfo(request):
 def show_stock_graph(request):
     api_key = 'I2CGXL68P1CJ9XNP'
     if request.method == 'POST':
-        if len(request.POST['stock']) > 2 and len(request.POST['stock']) < 6:
-            stock = request.POST['stock']
-            ts = TimeSeries(key=api_key, output_format='pandas')
-            data_ts, meta_data_ts = ts.get_daily(symbol=stock)
+        # If stock ticker entered is found in database
+        try:
+            # Make ticker entered to uppercase before running database check
+            stock = request.POST['stock'].upper()
 
-            #ti = TimeSeries(key=api_key, output_format='pandas')
-            #data_ti, meta_data_ti = ti.get_daily(symbol=stock)
+            # Create Arrays for each stock market data set
+            index = []
+            open = []
+            high = []
+            low = []
+            close = []
 
-            ts_df = data_ts
-            #ti_df = data_ti
+            # Find database record with ticker entered in input field
+            Ticker_db = Ticker.objects.get(ticker=stock)
 
-            payload = {'function': 'OVERVIEW', 'symbol': stock, 'apikey': 'YX9741BHQFXIYA0B'}
-            r = requests.get('https://www.alphavantage.co/query', params=payload)
-            r = r.json()
-            print(ts_df.index[0:15])
-            print(ts_df['1. open'][0:15])
+            # Split long string from database by each comma and create array
+            open_list = Ticker_db.open.split(",")
+            # Delete last item in array since its messed up
+            del open_list[-1]
+            # Make each item in array into a float number instead of string
+            for n in open_list:
+                open.append(float(n))
+
+            # Do this for the rest of the data sets
+            high_list = Ticker_db.high.split(",")
+            del high_list[-1]
+            for n in high_list:
+                high.append(float(n))
+
+            low_list = Ticker_db.low.split(",")
+            del low_list[-1]
+            for n in low_list:
+                low.append(float(n))
+
+            close_list = Ticker_db.close.split(",")
+            del close_list[-1]
+            for n in close_list:
+                close.append(float(n))
+
+            index_list = Ticker_db.index.split(",")
+            del index_list[-1]
+            for n in index_list:
+                t = pd.to_datetime(str(n))
+                timestring = t.strftime('%Y-%m-%d')
+                index.append(timestring)
+
+            # Create Pandas Dataframe from newly created arrays
+            data = pd.DataFrame({'date': index, '1. open': open, '2. high': high, '3. low': low, '4. close': close})
+            datetime_index = pd.DatetimeIndex(index)
+            df2 = data.set_index(datetime_index)
+            df2.drop('date', axis=1, inplace=True)
+            df2.index.name = 'date'
+
+            # Create Candlestick graph from newly created dataframe
             def candlestick():
                 figure = go.Figure(
                     data=[
                         go.Candlestick(
-                            x=ts_df.index,
-                            high=ts_df['2. high'],
-                            low=ts_df['3. low'],
-                            open=ts_df['1. open'],
-                            close=ts_df['4. close'],
+                            x=df2.index,
+                            high=df2['2. high'],
+                            low=df2['3. low'],
+                            open=df2['1. open'],
+                            close=df2['4. close'],
                         )
                     ]
                 )
                 candlestick_div = plot(figure, output_type='div')
                 return candlestick_div
 
-            stockName = r['Name']
-            sector = r['Sector']
-            marketcap = r['MarketCapitalization']
-            peratio = r['PERatio']
-            yearhigh = r['52WeekHigh']
-            yearlow = r['52WeekLow']
-            eps = r['EPS']
-
-            timeseries = ts_df.to_dict(orient='records')
-            closingprice = []
-            for k in timeseries:
-                closingprice.append(k['4. close'])
-            lowprice = []
-            for k in timeseries:
-                closingprice.append(k['3. low'])
-            highprice = []
-            for k in timeseries:
-                closingprice.append(k['2. high'])
-            openprice = []
-            for k in timeseries:
-                closingprice.append(k['1. open'])
-            pricedata = {
-                'close': [closingprice],
-                'open': [openprice],
-                'high': [highprice],
-                'low': [lowprice],
-            }
-            # miscellaneous stuff
-            day = datetime.datetime.now()
-            day = day.strftime("%A")
-
-            def human_format(num):
-                magnitude = 0
-                while abs(num) >= 1000:
-                    magnitude += 1
-                    num /= 1000.0
-                # add more suffixes if you need them
-                return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
-
-            marketcap = int(marketcap)
-            marketcap = human_format(marketcap)
-            closingprice = closingprice[0:15]
-            currentPrice = closingprice[0]
-            previousClosingPrice = closingprice[1]
-            priceChange = closingprice[0] - closingprice[1]
-            decimalChange = closingprice[0] / closingprice[1]
+            # Run Data Calculations
+            stockName = Ticker_db.stock_name
+            sector = Ticker_db.sector
+            marketcap = Ticker_db.market_cap
+            yearhigh = Ticker_db.year_high
+            yearlow = Ticker_db.year_low
+            closingprice = close[0]
+            currentPrice = close[0]
+            previousClosingPrice = close[1]
+            priceChange = close[0] - close[1]
+            decimalChange = close[0] / close[1]
             PosNegChange = decimalChange - 1
             percentageChange = PosNegChange * 100
 
-            # Pulling from Database
-            try:
-                currentPrice2 = Ticker.objects.get(ticker=stock).current_price
-            except:
-                currentPrice2 = 'Doesnt Exist'
-
-
             context = {
                 'sector': sector,
-                'currentPrice2': currentPrice2,
+                'currentPrice': currentPrice,
                 'marketcap': marketcap,
-                'peratio': peratio,
                 'yearhigh': yearhigh,
                 'yearlow': yearlow,
-                'eps': eps,
                 'closingprice': closingprice,
-                'openprice': openprice,
-                'highprice': highprice,
-                'lowprice': lowprice,
-                'pricedata': pricedata,
-                'timeseries': timeseries,
+                'openprice': open[0],
+                'highprice': high[0],
+                'lowprice': low[0],
                 'stock': stock,
-                'day': day,
                 'stockName': stockName,
-                'currentPrice': currentPrice,
                 'percentageChange': round(percentageChange, 2),
                 'previousClosingPrice': previousClosingPrice,
                 'priceChange': round(abs(priceChange), 2),
                 'candlestick': candlestick(),
             }
             return render(request, 'show_graph.html', context)
-        else:
+        except:
             context = {
                 'incorrectString': True,
             }
@@ -321,47 +312,46 @@ def UpdateDatabase(request):
     # I2CGXL68P1CJ9XNP
     # YX9741BHQFXIYA0B
     api_key = 'AYB32JWT41PK80BR'
-    tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL']
-    for f in range(5, 6):
+    tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL', 'AMZN', 'PLTR']
+    for f in range(7, 8):
+        # Get Daily Historical Stock Data from Alphavantage API
         ts = TimeSeries(key=api_key, output_format='pandas')
         data_ts, meta_data_ts = ts.get_daily(symbol=tag_list[f])
 
         ts_df = data_ts
 
-        payload = {'function': 'OVERVIEW', 'symbol': tag_list[f], 'apikey': 'YX9741BHQFXIYA0B'}
+        payload = {'function': 'OVERVIEW', 'symbol': tag_list[f], 'apikey': 'I2CGXL68P1CJ9XNP'}
         r = requests.get('https://www.alphavantage.co/query', params=payload)
         r = r.json()
 
-        def candlestick():
-            figure = go.Figure(
-                data=[
-                    go.Candlestick(
-                        x=ts_df.index,
-                        high=ts_df['2. high'],
-                        low=ts_df['3. low'],
-                        open=ts_df['1. open'],
-                        close=ts_df['4. close'],
-                    )
-                ]
-            )
-            candlestick_div = plot(figure, output_type='div')
-            return candlestick_div
-        test = []
-        for s in ts_df['2. high'][0:7].values:
-            print(s)
-        print("------------------------------------------------------")
-        print(ts_df)
-        print("------------------------------------------------------")
-        print("how to pull range of closing price numbers")
-        print("Most recent 8 closing price numbers: high=ts_df['2. high'][0:8].values\n", ts_df['2. high'][0])
-        # print("test\n", test[0])
-        print("------------------------------------------------------")
-        print("ts_df type: ", type(ts_df))
-        print("ts_df.index type: ", type(ts_df.index))
-        print("ts_df.index\n", ts_df.index)
-        print("ts_df.index[0:2]\n", ts_df.index[0:2])
-        print("ts_df['2. high']\n", ts_df['2. high'])
-        print("ts_df['2. high'][0:2]\n", ts_df['2. high'][0:2])
+        # Set string variables for each historical stock data set
+        openString= ""
+        closeString = ""
+        highString = ""
+        lowString = ""
+        indexString = ""
+
+        # Convert opening prices into one long string
+        for s in ts_df['1. open'].values:
+            openString += str(s) + ", "
+
+        # Convert high prices into one long string
+        for s in ts_df['2. high'].values:
+            highString += str(s) + ", "
+
+        # Convert low prices into one long string
+        for s in ts_df['3. low'].values:
+            lowString += str(s) + ", "
+
+        # Convert close prices into one long string
+        for s in ts_df['4. close'].values:
+            closeString += str(s) + ", "
+
+        # Convert date range into one long string
+        for s in ts_df.index.values:
+            indexString += str(s) + ", "
+
+        # Grab specific stock data from alphavantage api
         stockName = r['Name']
         sector = r['Sector']
         marketcap = r['MarketCapitalization']
@@ -370,28 +360,11 @@ def UpdateDatabase(request):
         yearlow = r['52WeekLow']
         eps = r['EPS']
 
+        # Put closing prices into array for other data calculations like previous closing price etc...
         timeseries = ts_df.to_dict(orient='records')
         closingprice = []
         for k in timeseries:
             closingprice.append(k['4. close'])
-        lowprice = []
-        for k in timeseries:
-            closingprice.append(k['3. low'])
-        highprice = []
-        for k in timeseries:
-            closingprice.append(k['2. high'])
-        openprice = []
-        for k in timeseries:
-            closingprice.append(k['1. open'])
-        pricedata = {
-            'close': [closingprice],
-            'open': [openprice],
-            'high': [highprice],
-            'low': [lowprice],
-        }
-        # miscellaneous stuff
-        day = datetime.datetime.now()
-        day = day.strftime("%A")
 
         def human_format(num):
             magnitude = 0
@@ -401,6 +374,7 @@ def UpdateDatabase(request):
             # add more suffixes if you need them
             return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
+        # Data calculations
         marketcap = int(marketcap)
         marketcap = human_format(marketcap)
         closingprice = closingprice[0:15]
@@ -411,6 +385,9 @@ def UpdateDatabase(request):
         PosNegChange = decimalChange - 1
         percentageChange = PosNegChange * 100
         print(f, tag_list[f])
+
+        # Updating database
+        # If stock is already created in database, update that database
         try:
             test = Ticker.objects.get(ticker=tag_list[f])
             print('Updating ', stockName, '...')
@@ -423,18 +400,27 @@ def UpdateDatabase(request):
             test.year_high = yearhigh
             test.year_low = yearlow
             test.price_change = priceChange
+            test.close = closeString
+            test.open = openString
+            test.high = highString
+            test.low = lowString
+            test.index = indexString
             test.save()
             print('Updated: ', stockName)
+
+        # If stock is NOT created in database, Create that database record
         except:
             print("Creating ", stockName, "...")
             test = Ticker(ticker=tag_list[f], stock_name=stockName, sector=sector, market_cap=marketcap,
                           current_price=currentPrice, previous_closing_price=previousClosingPrice,
                           percentage_change=percentageChange, year_high=yearhigh, year_low=yearlow,
-                          price_change=priceChange)
+                          price_change=priceChange, open=openString, close=closeString, high=highString, low=lowString, index=indexString)
             print("Saving ", test.stock_name, " to the Database...")
             test.save()
 
+        # Still trying to get this to work, Having api limitation issues but this
+        # makes it run two api calls at a time (update/create a database record) every 100 seconds
         if f % 3 == 0:
-            time.sleep(70)
+            time.sleep(100)
     print("Finished")
     return render(request, 'update_database.html')
