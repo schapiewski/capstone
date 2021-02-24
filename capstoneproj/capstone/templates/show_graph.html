@@ -39,7 +39,13 @@
 
 {% if incorrectString %}
   <div class="alert alert-danger alert-dismissible fade show" role="alert">
-  <strong>Error:</strong> Oops! Looks like you entered an incorrect stock. hint: Ticker symbols are between 3-5 characters long!
+  <p>
+    <strong>Error:</strong>
+    Oops! Looks like you entered an incorrect stock ticker. We offer a limited range of stocks
+    stemming from NASDAQ(100), Dow Jones(30), S&P 500.
+  </p>
+    <hr>
+  <p class="mb-0">hint: Ticker symbols are between 3-5 characters long!</p>
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
