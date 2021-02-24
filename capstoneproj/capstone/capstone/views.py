@@ -312,8 +312,8 @@ def UpdateDatabase(request):
     # I2CGXL68P1CJ9XNP
     # YX9741BHQFXIYA0B
     api_key = 'AYB32JWT41PK80BR'
-    tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL', 'AMZN', 'PLTR']
-    for f in range(7, 8):
+    tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL', 'AMZN', 'PLTR', 'AAPL']
+    for f in range(8, 9):
         # Get Daily Historical Stock Data from Alphavantage API
         ts = TimeSeries(key=api_key, output_format='pandas')
         data_ts, meta_data_ts = ts.get_daily(symbol=tag_list[f])
