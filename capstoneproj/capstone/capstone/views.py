@@ -30,7 +30,8 @@ from alpha_vantage.techindicators import TechIndicators
 import datetime
 from .models import Ticker
 import pandas as pd
-
+import plotly.express as px
+import numpy as np
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -192,6 +193,11 @@ def show_stock_graph(request):
                 timestring = t.strftime('%Y-%m-%d')
                 index.append(timestring)
 
+            #outputs last in array which should be the newest
+            macd_list = Ticker_db.macd.split(",")
+            del macd_list[-1]
+            macd = macd_list[-1]
+
             # Create Pandas Dataframe from newly created arrays
             data = pd.DataFrame({'date': index, '1. open': open, '2. high': high, '3. low': low, '4. close': close})
             datetime_index = pd.DatetimeIndex(index)
@@ -245,6 +251,8 @@ def show_stock_graph(request):
                 'previousClosingPrice': previousClosingPrice,
                 'priceChange': round(abs(priceChange), 2),
                 'candlestick': candlestick(),
+                'macd': macd,
+                'recommendation': Ticker_db.recommendation
             }
             return render(request, 'show_graph.html', context)
         except:
@@ -312,8 +320,8 @@ def UpdateDatabase(request):
     # I2CGXL68P1CJ9XNP
     # YX9741BHQFXIYA0B
     api_key = 'AYB32JWT41PK80BR'
-    tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL', 'AMZN', 'PLTR', 'AAPL']
-    for f in range(8, 9):
+    tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL', 'AMZN', 'PLTR', 'AAPL', 'TSLA']
+    for f in range(9, 10):
         # Get Daily Historical Stock Data from Alphavantage API
         ts = TimeSeries(key=api_key, output_format='pandas')
         data_ts, meta_data_ts = ts.get_daily(symbol=tag_list[f])
@@ -351,6 +359,7 @@ def UpdateDatabase(request):
         for s in ts_df.index.values:
             indexString += str(s) + ", "
 
+        print(r)
         # Grab specific stock data from alphavantage api
         stockName = r['Name']
         sector = r['Sector']
@@ -365,7 +374,7 @@ def UpdateDatabase(request):
         closingprice = []
         for k in timeseries:
             closingprice.append(k['4. close'])
-
+        print(ts_df)
         def human_format(num):
             magnitude = 0
             while abs(num) >= 1000:
@@ -373,6 +382,39 @@ def UpdateDatabase(request):
                 num /= 1000.0
             # add more suffixes if you need them
             return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
+
+#-----------------------------------------------ema--------------------------------------------------------------------#
+        #calaculate ema
+        #save  a original ema value array, each update pull last ema calculate new one save
+        #array of closed values with last one being the current day, n = n-day ema to calculate, n<= total close values
+        def ema_initial(close, n): #outputs ema array (old->new)
+            ema = []
+            sma = sum(close[:n])
+            ema.append(sma/n)
+            for i in range(n, len(close)):
+                weight = 2/(1 + n)
+                ema.append((close[i] * weight) + (ema[-1] * (1 - weight)))
+            print('current days ', n, '- day ema: ', ema[-1])
+            return ema
+
+        def macd_initial(twelve, tsix):
+            macdArray = []
+            #goes in reverse to the the mismatch in lengths of 26-day emas vs 12-day emas
+            for i in range(len(tsix) - 1, -1, -1):
+                macdArray.append(twelve[i] - tsix[i])
+
+            # reverse the list from (new...older) to (old...newer)
+            return [ele for ele in reversed(macdArray)]
+
+        # returns single value, but takes in oldemas [-1] is newest
+        def ema_new(oldEmas, close, n):
+            weight = 2 / (1 + n)
+            newEma = (close * weight) + (oldEmas[-1] * (1 - weight))
+            return newEma
+
+        #saving original closing price and reversing it so (old->new) to help with calculations
+        closingprice_ema = np.array(closingprice)[::-1]
+# ----------------------------------------------------------------------------------------------------------------------#
 
         # Data calculations
         marketcap = int(marketcap)
@@ -390,6 +432,26 @@ def UpdateDatabase(request):
         # If stock is already created in database, update that database
         try:
             test = Ticker.objects.get(ticker=tag_list[f])
+
+            #Convert needed arrays to floats
+            ema12_string_array = test.ema12.replace(' ', '').split(",")
+            ema26_string_array = test.ema26.replace(' ', '').split(",")
+            macd_signal_string_array = test.macd_signal.replace(' ', '').split(",")
+            del ema12_string_array[-1]
+            del ema26_string_array[-1]
+            del macd_signal_string_array[-1]
+
+            day12 = [float(x) for x in ema12_string_array]
+            day26 = [float(x) for x in ema26_string_array]
+            macdSignalLine = [float(x) for x in macd_signal_string_array]
+
+            #acts as if newest closing value is [-1], calculates new values for the day
+            ema12 = str(ema_new(day12, closingprice_ema[-1], 12))
+            ema26 = str(ema_new(day26, closingprice_ema[-1], 26))
+            macd_string = day12[-1] - day26[-1]
+            macd_signal_string = str(ema_new(macdSignalLine, macd_string, 9))
+            macd_string = str(macd_string)
+
             print('Updating ', stockName, '...')
             test.stock_name = stockName
             test.sector = sector
@@ -405,16 +467,56 @@ def UpdateDatabase(request):
             test.high = highString
             test.low = lowString
             test.index = indexString
+            test.ema12 = test.ema12 + ema12 + ', '
+            test.ema26 = test.ema26 + ema26 + ', '
+            test.macd = test.macd + macd_string + ', '
+            test.macd_signal = test.macd_signal + macd_signal_string + ', '
+
+            #if macd is crossing above signal line buy else sell
+            if float(macd_string) > float(macd_signal_string):
+                test.recommendation = 'Buy'
+            else:
+                test.recommendation = 'Sell'
+
             test.save()
             print('Updated: ', stockName)
 
         # If stock is NOT created in database, Create that database record
         except:
             print("Creating ", stockName, "...")
+
+            #building initial emas should only run if stock doesnt already exist
+            day12 = ema_initial(closingprice_ema, 12)
+            day26 = ema_initial(closingprice_ema, 26)
+            macd = macd_initial(day12, day26)
+            macdSignalLine = ema_initial(macd, 9)
+
+            if macd[-1] > macdSignalLine[-1]:
+                recommend = 'Buy'
+            else:
+                recommend = 'Sell'
+
+            day12_string = ""
+            day26_string = ""
+            macd_string = ""
+            macdSignalLine_string = ""
+
+            #Converting to string for database
+            for s in day12:
+                day12_string += str(s) + ", "
+            for s in day26:
+                day26_string += str(s) + ", "
+            for s in macd:
+                macd_string += str(s) + ", "
+            for s in macdSignalLine:
+                macdSignalLine_string += str(s) + ", "
+
             test = Ticker(ticker=tag_list[f], stock_name=stockName, sector=sector, market_cap=marketcap,
                           current_price=currentPrice, previous_closing_price=previousClosingPrice,
                           percentage_change=percentageChange, year_high=yearhigh, year_low=yearlow,
-                          price_change=priceChange, open=openString, close=closeString, high=highString, low=lowString, index=indexString)
+                          price_change=priceChange, open=openString, close=closeString, high=highString,
+                          low=lowString, index=indexString, ema12=day12_string, ema26=day26_string, macd=macd_string,
+                          macd_signal=macdSignalLine_string, recommendation=recommend)
             print("Saving ", test.stock_name, " to the Database...")
             test.save()
 
