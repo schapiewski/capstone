@@ -27,5 +27,6 @@ When grabbing project from github:
 8) Set working directory (Ex: C:\Users\<user>\Documents\GitHub\capstone\capstoneproj\capstone)
 9) Now the play button should run a local server on your computer and you can now view the app
 
-## QA Testing: https://github.com/dkkocab/capstone_QATesting 
+## QA Testing: 
+For QA tests, code must be ran in VS Code along side the project running in PyCharm. You'll need to install WebDriver and change the variable to point to where you installed it. The Create account tests will fail now that we added email authentication.
 
