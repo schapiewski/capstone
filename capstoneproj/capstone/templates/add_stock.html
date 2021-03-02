@@ -26,19 +26,19 @@
     </tr>
   </thead>
   <tbody>
-{% if ticker %}
+{% if output %}
 
 
 
   			{% for list_item in output %}
   			<tr>
-				<th scope="row">{{ list_item.companyName}}</th>
-				<td>${{ list_item.latestPrice }}</td>
-				<td>${{ list_item.previousClose }}</td>
-				<td>${{ list_item.marketCap }}</td>
-				<td>{{ list_item.ytdChange }}%</td>
-				<td>${{ list_item.week52High }}</td>
-				<td>${{ list_item.week52Low }}</td>
+				<th scope="row">{{ list_item.stock_name}}</th>
+				<td>${{ list_item.current_price }}</td>
+				<td>${{ list_item.previous_closing_price }}</td>
+				<td>${{ list_item.market_cap }}</td>
+				<td>{{ list_item.price_change }}%</td>
+				<td>${{ list_item.year_high }}</td>
+				<td>${{ list_item.year_low }}</td>
 			</tr>
 			{% endfor %}
 
@@ -47,16 +47,4 @@
 </table>
 {% endif %}
 
-<br/><br/>
-<h4>Delete Stock </h4>
-<br/>
-{% if ticker %}
-  {% for item in ticker %}
-    <a href="{% url 'delete' item.id %}" class="btn btn-warning">
-    Delete {{ item }}</a> &nbsp;
-  {% endfor %}
-
-{% else %}
-  You don't have any stocks...
-{% endif %}
 {% endblock %}
