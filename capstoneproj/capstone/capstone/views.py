@@ -196,7 +196,7 @@ def show_stock_graph(request):
             #outputs last in array which should be the newest
             macd_list = Ticker_db.macd.split(",")
             del macd_list[-1]
-            macd = macd_list[-1]
+            macd = float(macd_list[-1].strip())
 
             # Create Pandas Dataframe from newly created arrays
             data = pd.DataFrame({'date': index, '1. open': open, '2. high': high, '3. low': low, '4. close': close})
@@ -251,7 +251,7 @@ def show_stock_graph(request):
                 'previousClosingPrice': previousClosingPrice,
                 'priceChange': round(abs(priceChange), 2),
                 'candlestick': candlestick(),
-                'macd': macd,
+                'macd': round(macd, 2),
                 'recommendation': Ticker_db.recommendation
             }
             return render(request, 'show_graph.html', context)
