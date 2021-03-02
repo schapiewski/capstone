@@ -277,35 +277,25 @@ def sectorForm(request):
     return render(request, 'sector_form.html', {'info': info})
 
 
-# @login_required(login_url='login')
-# def add_stock(request):
-#     if request.method == 'POST':
-#         form = StockForm(request.POST or None)
-#
-#         if form.is_valid():
-#             form.save()
-#             messages.success(request, "Stock has been Added!")
-#             return redirect('add_stock')
-#     else:
-#
-#         ticker = Stock.objects.all()
-#         output = []
-#         for ticker_item in ticker:
-#             api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + str(ticker_item) + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
-#             try:
-#                 api = json.loads(api_request.content)
-#                 output.append(api)
-#             except Exception as e:
-#                 api = "Error..."
-#         return render(request, 'add_stock.html', {'ticker': ticker, 'output': output})
+@login_required(login_url='login')
+def add_stock(request):
+    current_user = request.user
+    if request.user.is_authenticated:
+        users_stocks = Ticker.objects.get(ownedBy=current_user)
+        if request.method == 'POST':
+            form = StockForm(request.POST or None)
 
-# @login_required(login_url='login')
-# def delete(request, stock_id):
-#
-# 	item = Stock.objects.get(pk=stock_id)
-# 	item.delete()
-# 	messages.success(request, ("Stock Has Been Deleted!"))
-# 	return redirect(add_stock)
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Stock has been Added!")
+                return redirect('add_stock')
+        else:
+            output = []
+            stock = users_stocks
+            output.append(stock)
+    else:
+        return redirect('pricing.html')
+    return render(request, 'add_stock.html', {'users_stocks': users_stocks, 'output': output })
 
 @login_required(login_url='login')
 def UpdateDatabase(request):

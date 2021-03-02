@@ -29,39 +29,36 @@
 {% block content %}
 {% csrf_token %}
 
-{% if ticker %}
-  {{ ticker }}
+{% if users_stocks %}
+  {{ users_stocks }}
 {% endif %}
 
-{% if api %}
-	{% if api == "Error..."%}
-	There was a problem with your ticker symbol, please try again...
-	{% else %}
-		<h1>{{api.companyName}}</h1><br/>
-		<table class="table table-striped table-hover">
-			<thead class="thead-light">
-			<tr>
-			    <td scope="col">Current Price</td>
-			    <td scope="col">Previous Close</td>
-			    <td scope="col">Market Cap</td>
-			    <td scope="col">YTD Change</td>
-			    <td scope="col">52Wk High</td>
-			    <td scope="col">52Wk Low</td>
-			</tr>
-			</thead>
-			<tbody>
-			<tr>
-				<td>${{ api.latestPrice }}</td>
-				<td>${{ api.previousClose }}</td>
-				<td>${{ api.marketCap }}</td>
-				<td>{{ api.ytdChange }}%</td>
-				<td>${{ api.week52High }}</td>
-				<td>${{ api.week52Low }}</td>
-			</tr>
-			</tbody>
-		</table><br/><br/>
+{% if stock %}
+
+	<h1>{{stock.stock_name}}</h1><br/>
+	<table class="table table-striped table-hover">
+		<thead class="thead-light">
+		<tr>
+			<td scope="col">Current Price</td>
+			<td scope="col">Previous Close</td>
+			<td scope="col">Market Cap</td>
+			<td scope="col">YTD Change</td>
+			<td scope="col">52Wk High</td>
+			<td scope="col">52Wk Low</td>
+		</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td>${{ stock.current_price }}</td>
+			<td>${{ stock.previous_closing_price }}</td>
+			<td>${{ stock.market_cap }}</td>
+			<td>{{ stock.price_change }}%</td>
+			<td>${{ stock.year_high }}</td>
+			<td>${{ stock.year_low }}</td>
+		</tr>
+		</tbody>
+	</table><br/><br/>
 
 
-	{% endif %}
 {% endif %}
 {% endblock %}

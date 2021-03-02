@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 
 class Stock(models.Model):
     ticker = models.CharField(max_length=10)
@@ -20,6 +20,7 @@ class Package(models.Model):
 class Ticker(models.Model):
     ticker = models.CharField(max_length=10)
     stock_name = models.CharField(max_length=100, unique=True)
+    ownedBy = models.ManyToManyField(User)
     close = models.TextField(default='26.76, 34.45, 45.43, 54.56')
     open = models.TextField(default='28.76, 36.45, 44.43, 56.56')
     high = models.TextField(default='28.76, 38.45, 48.43, 58.56')
