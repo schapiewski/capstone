@@ -96,6 +96,8 @@
               <th scope="col">Yearly High</th>
               <th scope="col">Year Low</th>
               <th scope="col">Market Cap</th>
+              <th scope="col">MACD Value</th>
+              <th scope="col">Recommendation</th>
             </tr>
           </thead>
           <tbody>
@@ -105,6 +107,14 @@
               <td>${{yearhigh}}</td>
               <td>${{yearlow}}</td>
               <td>${{marketcap}}</td>
+              <td>{{macd}}</td>
+
+              {% if recommendation == 'Buy' %}
+              <td style="color: green">{{recommendation}}</td>
+              {% else %}
+              <td style="color: red">{{recommendation}}</td>
+              {% endif %}
+
             </tr>
           </tbody>
         </table>
