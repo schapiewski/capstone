@@ -34,6 +34,11 @@ class Ticker(models.Model):
     year_high = models.DecimalField(decimal_places=2, max_digits=10000)
     year_low = models.DecimalField(decimal_places=2, max_digits=10000)
     price_change = models.DecimalField(decimal_places=2, max_digits=10000)
+    ema12 = models.TextField(default='26.76, 34.45, 45.43, 54.56')
+    ema26 = models.TextField(default='26.76, 34.45, 45.43, 54.56')
+    macd = models.TextField(default='26.76, 34.45, 45.43, 54.56')
+    macd_signal = models.TextField(default='26.76, 34.45, 45.43, 54.56')
+    recommendation = models.CharField(max_length=10, default='Sell')
 
     def __str__(self):
         return '%s' % (self.ticker)
