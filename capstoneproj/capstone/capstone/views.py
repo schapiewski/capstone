@@ -349,7 +349,6 @@ def UpdateDatabase(request):
         for s in ts_df.index.values:
             indexString += str(s) + ", "
 
-        print(r)
         # Grab specific stock data from alphavantage api
         stockName = r['Name']
         sector = r['Sector']
