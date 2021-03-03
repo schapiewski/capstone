@@ -172,3 +172,8 @@ label{
     background-color: transparent!important;
     border-color: transparent!important;
 }
+.ticker-header{
+   background: transparent!important;
+   border: none!important;
+   color: #1ab188!important;
+}
