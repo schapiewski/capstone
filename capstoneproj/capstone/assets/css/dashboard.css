@@ -136,7 +136,11 @@ h1,h2{
 }
 .display-2{
   background-color:#13232f;
-  font-size: 5.5vw!important;
+  font-size: 5vw!important;
+}
+.fix-hover:hover {
+    color: white!important;
+    background-color: rgba(0,0,0,1);
 }
 #stockName{
   box-shadow: 0px 10px 15px black;
