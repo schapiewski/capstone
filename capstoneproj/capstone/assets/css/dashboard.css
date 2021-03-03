@@ -136,7 +136,7 @@ h1,h2{
 }
 .display-2{
   background-color:#13232f;
-  font-size: 5vw!important;
+  font-size: 4vw!important;
 }
 .fix-hover:hover {
     color: white!important;
@@ -176,4 +176,8 @@ label{
    background: transparent!important;
    border: none!important;
    color: #1ab188!important;
+}
+
+.ticker-header:hover{
+   color: #16906f!important;
 }
