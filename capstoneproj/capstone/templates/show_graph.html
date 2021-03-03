@@ -45,7 +45,7 @@
     stemming from NASDAQ(100), Dow Jones(30), S&P 500.
   </p>
   <hr>
-  <p class="mb-0">hint: Ticker symbols are between 3-5 characters long!</p>
+  <p class="mb-0">hint: Ticker symbols are between 1-5 characters long!</p>
   <button type="button" class="close" data-dismiss="alert" aria-label="Close">
     <span aria-hidden="true">&times;</span>
   </button>
@@ -87,9 +87,10 @@
       <div class="container">
         {{candlestick | safe}}
       </div>
-      <div class="container px-5">
-        <table class="table">
-          <thead>
+      <div class="container px-3 my-3">
+        <div class="table-responsive">
+        <table class="table table-striped">
+          <thead class="thead-light">
           <tr>
             <th scope="col">Current Price</th>
             <th scope="col">Previous Closing</th>
@@ -97,7 +98,6 @@
             <th scope="col">Year Low</th>
             <th scope="col">Market Cap</th>
             <th scope="col">MACD Value</th>
-            <th scope="col">Recommendation</th>
           </tr>
           </thead>
           <tbody>
@@ -108,15 +108,10 @@
             <td>${{yearlow}}</td>
             <td>${{marketcap}}</td>
             <td>{{macd}}</td>
-
-            {% if recommendation == 'Buy (Hold)' %}
-            <td style="color: green">{{recommendation}}</td>
-            {% else %}
-            <td style="color: red">{{recommendation}}</td>
-            {% endif %}
           </tr>
           </tbody>
         </table>
+          </div>
       </div>
       <br>
       <br>

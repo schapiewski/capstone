@@ -289,7 +289,106 @@ def sectorForm(request):
 def add_stock(request):
     current_user = request.user
     if request.user.is_authenticated:
-        users_stocks = Ticker.objects.get(ownedBy=current_user)
+        stockName = []
+        sector = []
+        marketcap = []
+        yearhigh = []
+        yearlow = []
+        closingprice = []
+        currentPrice = []
+        previousClosingPrice = []
+        priceChange = []
+        decimalChange = []
+        PosNegChange = []
+        percentageChange = []
+        users_stocks = Ticker.objects.filter(ownedBy=current_user)
+        for i in range(0, len(users_stocks)):
+            # Create Arrays for each stock market data set
+            index = []
+            open = []
+            high = []
+            low = []
+            close = []
+            stock = users_stocks[i]
+            # Find database record with ticker entered in input field
+            Ticker_db = Ticker.objects.get(ticker=stock)
+            # Split long string from database by each comma and create array
+            open_list = Ticker_db.open.split(",")
+            # Delete last item in array since its messed up
+            del open_list[-1]
+            # Make each item in array into a float number instead of string
+            for n in open_list:
+                open.append(float(n))
+
+            # Do this for the rest of the data sets
+            high_list = Ticker_db.high.split(",")
+            del high_list[-1]
+            for n in high_list:
+                high.append(float(n))
+
+            low_list = Ticker_db.low.split(",")
+            del low_list[-1]
+            for n in low_list:
+                low.append(float(n))
+
+            close_list = Ticker_db.close.split(",")
+            del close_list[-1]
+            for n in close_list:
+                close.append(float(n))
+
+            index_list = Ticker_db.index.split(",")
+            del index_list[-1]
+            for n in index_list:
+                t = pd.to_datetime(str(n))
+                timestring = t.strftime('%Y-%m-%d')
+                index.append(timestring)
+
+            # outputs last in array which should be the newest
+            macd_list = Ticker_db.macd.split(",")
+            del macd_list[-1]
+            macd = float(macd_list[-1].strip())
+
+            # Create Pandas Dataframe from newly created arrays
+            data = pd.DataFrame({'date': index, '1. open': open, '2. high': high, '3. low': low, '4. close': close})
+            datetime_index = pd.DatetimeIndex(index)
+            df2 = data.set_index(datetime_index)
+            df2.drop('date', axis=1, inplace=True)
+            df2.index.name = 'date'
+
+            # Create Candlestick graph from newly created dataframe
+            def candlestick():
+                figure = go.Figure(
+                    data=[
+                        go.Candlestick(
+                            x=df2.index,
+                            high=df2['2. high'],
+                            low=df2['3. low'],
+                            open=df2['1. open'],
+                            close=df2['4. close'],
+                        )
+                    ]
+                )
+                candlestick_div = plot(figure, output_type='div')
+                return candlestick_div
+
+            # Run Data Calculations
+            sector.append(Ticker_db.sector)
+            marketcap.append(Ticker_db.market_cap)
+            yearhigh.append(Ticker_db.year_high)
+            yearlow.append(Ticker_db.year_low)
+            closingprice.append(close[0])
+            currentPrice.append(close[0])
+            previousClosingPrice.append(close[1])
+            priceChange.append(round(abs(close[0] - close[1])))
+            decimalChange_num = close[0] / close[1]
+            decimalChange.append(decimalChange_num)
+            PosNegChange_num = decimalChange_num - 1
+            PosNegChange.append(PosNegChange_num)
+            percentageChange_num = round(PosNegChange_num * 100, 2)
+            percentageChange.append(percentageChange_num)
+            print("test", users_stocks)
+            print(stockName)
+        print(stockName)
         if request.method == 'POST':
             form = StockForm(request.POST or None)
 
@@ -303,7 +402,28 @@ def add_stock(request):
             output.append(stock)
     else:
         return redirect('pricing.html')
-    return render(request, 'add_stock.html', {'users_stocks': users_stocks, 'output': output })
+    context = {
+        'users_stocks': users_stocks,
+        'output': output,
+        'sector': sector,
+        'currentPrice': currentPrice,
+        'marketcap': marketcap,
+        'yearhigh': yearhigh,
+        'yearlow': yearlow,
+        'closingprice': closingprice,
+        'openprice': open[0],
+        'highprice': high[0],
+        'lowprice': low[0],
+        'stock': stock,
+        'stockName': stockName,
+        'percentageChange': percentageChange,
+        'previousClosingPrice': previousClosingPrice,
+        'priceChange': priceChange,
+        'candlestick': candlestick(),
+        'macd': round(macd, 2),
+        'recommendation': Ticker_db.recommendation
+    }
+    return render(request, 'add_stock.html', context)
 
 @login_required(login_url='login')
 def UpdateDatabase(request):

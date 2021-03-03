@@ -136,7 +136,11 @@ h1,h2{
 }
 .display-2{
   background-color:#13232f;
-  font-size: 5.5vw!important;
+  font-size: 4vw!important;
+}
+.fix-hover:hover {
+    color: white!important;
+    background-color: rgba(0,0,0,1);
 }
 #stockName{
   box-shadow: 0px 10px 15px black;
@@ -167,4 +171,13 @@ label{
 .alert-info {
     background-color: transparent!important;
     border-color: transparent!important;
+}
+.ticker-header{
+   background: transparent!important;
+   border: none!important;
+   color: #1ab188!important;
+}
+
+.ticker-header:hover{
+   color: #16906f!important;
 }

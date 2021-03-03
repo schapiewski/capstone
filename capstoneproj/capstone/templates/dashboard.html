@@ -55,6 +55,11 @@
 			<td>{{ stock.price_change }}%</td>
 			<td>${{ stock.year_high }}</td>
 			<td>${{ stock.year_low }}</td>
+			{% if recommendation == 'Buy (Hold)' %}
+            <td style="color: green">{{recommendation}}</td>
+            {% else %}
+            <td style="color: red">{{recommendation}}</td>
+            {% endif %}
 		</tr>
 		</tbody>
 	</table><br/><br/>
