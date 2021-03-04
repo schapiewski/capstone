@@ -301,6 +301,7 @@ def add_stock(request):
         decimalChange = []
         PosNegChange = []
         percentageChange = []
+        recommendation = []
         users_stocks = Ticker.objects.filter(ownedBy=current_user)
         for i in range(0, len(users_stocks)):
             # Create Arrays for each stock market data set
@@ -386,9 +387,7 @@ def add_stock(request):
             PosNegChange.append(PosNegChange_num)
             percentageChange_num = round(PosNegChange_num * 100, 2)
             percentageChange.append(percentageChange_num)
-            print("test", users_stocks)
-            print(stockName)
-        print(stockName)
+            recommendation.append(Ticker_db.recommendation)
         if request.method == 'POST':
             form = StockForm(request.POST or None)
 
@@ -421,7 +420,7 @@ def add_stock(request):
         'priceChange': priceChange,
         'candlestick': candlestick(),
         'macd': round(macd, 2),
-        'recommendation': Ticker_db.recommendation
+        'recommendation': recommendation
     }
     return render(request, 'add_stock.html', context)
 
