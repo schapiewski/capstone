@@ -284,6 +284,8 @@ def sectorForm(request):
     print({'info': info})
     return render(request, 'sector_form.html', {'info': info})
 
+def sectorPage(request):
+    return render(request, 'sector_page.html')
 
 @login_required(login_url='login')
 def add_stock(request):
