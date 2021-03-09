@@ -32,6 +32,7 @@ from .models import Ticker
 import pandas as pd
 import plotly.express as px
 import numpy as np
+import csv
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -430,14 +431,24 @@ def UpdateDatabase(request):
     # YX9741BHQFXIYA0B
     api_key = 'AYB32JWT41PK80BR'
     tag_list = ['GOOG', 'NOK', 'GME', 'AMC', 'DAL', 'CCL', 'AMZN', 'PLTR', 'AAPL', 'TSLA']
+
+    # sp500 names
+    sp500 = []
+    with open("../../sp500.csv", 'r') as csvfile:
+        reader = csv.reader(csvfile)
+        for row in reader:
+            for item in row:
+                sp500.append(item)
+
+
     for f in range(9, 10):
         # Get Daily Historical Stock Data from Alphavantage API
         ts = TimeSeries(key=api_key, output_format='pandas')
-        data_ts, meta_data_ts = ts.get_daily(symbol=tag_list[f])
+        data_ts, meta_data_ts = ts.get_daily(symbol=sp500[f])
 
         ts_df = data_ts
 
-        payload = {'function': 'OVERVIEW', 'symbol': tag_list[f], 'apikey': 'I2CGXL68P1CJ9XNP'}
+        payload = {'function': 'OVERVIEW', 'symbol': sp500[f], 'apikey': 'I2CGXL68P1CJ9XNP'}
         r = requests.get('https://www.alphavantage.co/query', params=payload)
         r = r.json()
 
@@ -469,6 +480,11 @@ def UpdateDatabase(request):
             indexString += str(s) + ", "
 
         # Grab specific stock data from alphavantage api
+
+        # skip dumb message
+        # if r == "message":
+            # continue
+
         stockName = r['Name']
         sector = r['Sector']
         marketcap = r['MarketCapitalization']
@@ -534,12 +550,12 @@ def UpdateDatabase(request):
         decimalChange = closingprice[0] / closingprice[1]
         PosNegChange = decimalChange - 1
         percentageChange = PosNegChange * 100
-        print(f, tag_list[f])
+        print(f, sp500[f])
 
         # Updating database
         # If stock is already created in database, update that database
         try:
-            test = Ticker.objects.get(ticker=tag_list[f])
+            test = Ticker.objects.get(ticker=sp500[f])
 
             #Convert needed arrays to floats
             ema12_string_array = test.ema12.replace(' ', '').split(",")
@@ -619,7 +635,7 @@ def UpdateDatabase(request):
             for s in macdSignalLine:
                 macdSignalLine_string += str(s) + ", "
 
-            test = Ticker(ticker=tag_list[f], stock_name=stockName, sector=sector, market_cap=marketcap,
+            test = Ticker(ticker=sp500[f], stock_name=stockName, sector=sector, market_cap=marketcap,
                           current_price=currentPrice, previous_closing_price=previousClosingPrice,
                           percentage_change=percentageChange, year_high=yearhigh, year_low=yearlow,
                           price_change=priceChange, open=openString, close=closeString, high=highString,
