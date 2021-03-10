@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Stock, Ticker
+from .models import Stock, Ticker, Sector
 
-models = [Stock, Ticker]
+models = [Stock, Ticker, Sector]
 admin.site.register(models)

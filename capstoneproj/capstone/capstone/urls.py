@@ -33,6 +33,7 @@ urlpatterns = [
     path('sector_page/', views.sectorPage, name='sector_page'),
     #added
     path('update_database/', views.UpdateDatabase, name='update_database'),
+    path('update_sector/', views.UpdateSector, name='update_sector'),
     path('add_stock.html', views.add_stock, name="add_stock"),
     #path('delete/<stock_id>', views.delete, name="delete"),
 
