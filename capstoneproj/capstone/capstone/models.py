@@ -16,6 +16,14 @@ class Package(models.Model):
     def __str__(self):
         return self.package, self.sector
 
+class Sector(models.Model):
+    sector_name = models.CharField(max_length=30)
+    percent_change = models.CharField(max_length=10)
+
+
+    def __str__(self):
+        return self.sector_name
+
 
 class Ticker(models.Model):
     ticker = models.CharField(max_length=10)

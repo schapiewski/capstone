@@ -2,47 +2,159 @@
 {% block content %}
 
 <h1>U.S. Sectors & Industries Performance</h1>
-
-<br/><br/>
-<div class="recommendationoverview">
-<table class="table table-striped table-hover" style="width:75%">
-  <thead class="bg-success">
-    <tr>
-      <th scope="col">Sector</th>
-      <th scope="col">Last % Change</th>
-      <th scope="col">1 Year % Change</th>
-    </tr>
-  </thead>
-</table>
+<div class="container">
+    <div class="row py-3">
+        <div class="col-12">
+            <div class="recommendationfunction">
+                <h5 style="color:white;width:33%">Select a Sector for Recommendations:</h5>
+                <select name="dropdownplaceholder" id="placeholder" style="width:33%">
+                    <option value="placeholder">Communication Services</option>
+                    <option value="placeholder">Consumer Discretionary</option>
+                    <option value="placeholder">Consumer Staples</option>
+                    <option value="placeholder">Energy</option>
+                    <option value="placeholder">Financials</option>
+                    <option value="placeholder">Health Care</option>
+                    <option value="placeholder">Industrials</option>
+                    <option value="placeholder">Information Technology</option>
+                    <option value="placeholder">Materials</option>
+                    <option value="placeholder">Real Estate</option>
+                    <option value="placeholder">Utilities</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xl-8 col-lg-12">
+            <div class="recommendationfunction">
+                <table class="table table-striped">
+                    <thead class="bg-success">
+                    <tr>
+                        <th scope="col">Sector</th>
+                        <th scope="col">Price ($)</th>
+                        <th scope="col">12-Month P/E Ratio</th>
+                        <th scope="col">Moving Avg (1M)</th>
+                        <th scope="col">Moving Avg (3M)</th>
+                        <th scope="col">Exchange</th>
+                    </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        <div class="col-xl-4 col-lg-12">
+            <div class="recommendationoverview">
+                <table class="table table-striped" style="margin: 0px">
+                    <thead class="thead-light">
+                    <tr>
+                        <th scope="col">Sector</th>
+                        <th scope="col">Last % Change</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        {% if "+" in communication_services_pctchange %}
+                        <td style="color: green">{{communication_services_name}}</td>
+                        <td style="color: green">{{communication_services_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{communication_services_name}}</td>
+                        <td style="color: red">{{communication_services_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in consumer_descretionary_pctchange %}
+                        <td style="color: green">{{consumer_descretionary_name}}</td>
+                        <td style="color: green">{{consumer_descretionary_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{consumer_descretionary_name}}</td>
+                        <td style="color: red">{{consumer_descretionary_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in consumer_staples_pctchange %}
+                        <td style="color: green">{{consumer_staples_name}}</td>
+                        <td style="color: green">{{consumer_staples_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{consumer_staples_name}}</td>
+                        <td style="color: red">{{consumer_staples_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in energy_pctchange %}
+                        <td style="color: green">{{energy_name}}</td>
+                        <td style="color: green">{{energy_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{energy_name}}</td>
+                        <td style="color: red">{{energy_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in financials_pctchange %}
+                        <td style="color: green">{{financials_name}}</td>
+                        <td style="color: green">{{financials_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{financials_name}}</td>
+                        <td style="color: red">{{financials_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in health_care_pctchange %}
+                        <td style="color: green">{{health_care_name}}</td>
+                        <td style="color: green">{{health_care_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{health_care_name}}</td>
+                        <td style="color: red">{{health_care_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in industrials_pctchange %}
+                        <td style="color: green">{{industrials_name}}</td>
+                        <td style="color: green">{{industrials_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{industrials_name}}</td>
+                        <td style="color: red">{{industrials_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in information_technology_pctchange %}
+                        <td style="color: green">{{information_technology_name}}</td>
+                        <td style="color: green">{{information_technology_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{information_technology_name}}</td>
+                        <td style="color: red">{{information_technology_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in materials_pctchange %}
+                        <td style="color: green">{{materials_name}}</td>
+                        <td style="color: green">{{materials_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{materials_name}}</td>
+                        <td style="color: red">{{materials_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in real_estate_pctchange %}
+                        <td style="color: green">{{real_estate_name}}</td>
+                        <td style="color: green">{{real_estate_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{real_estate_name}}</td>
+                        <td style="color: red">{{real_estate_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    <tr>
+                        {% if "+" in utilities_pctchange %}
+                        <td style="color: green">{{utilities_name}}</td>
+                        <td style="color: green">{{utilities_pctchange}}</td>
+                        {% else %}
+                        <td style="color: red">{{utilities_name}}</td>
+                        <td style="color: red">{{utilities_pctchange}}</td>
+                        {% endif %}
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-
-<br/><br/>
-
-<div class="recommendationfunction">
-
-<h5 style="color:white;border: 1px solid grey;width:33%">Select a Sector for Recommendations:</h5>
-  <select name="dropdownplaceholder" id="placeholder" style="width:33%">
-    <option value="placeholder">placeholder</option>
-  </select>
-
-<br/><br/>
-
-<table class="table table-striped table-hover">
-  <thead class="bg-success">
-    <tr>
-        <th scope="col">Sector</th>
-        <th scope="col">Price ($)</th>
-        <th scope="col">12-Month P/E Ratio</th>
-        <th scope="col">Moving Avg (1M)</th>
-        <th scope="col">Moving Avg (3M)</th>
-        <th scope="col">Exchange</th>
-    </tr>
-  </thead>
-</table>
-</div>
-
-
-  <tbody>
 
 
 {% endblock %}

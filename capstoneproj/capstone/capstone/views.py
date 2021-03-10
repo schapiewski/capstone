@@ -29,9 +29,12 @@ import requests
 from alpha_vantage.techindicators import TechIndicators
 import datetime
 from .models import Ticker
+from .models import Sector
 import pandas as pd
 import plotly.express as px
 import numpy as np
+from bs4 import BeautifulSoup
+from selenium import webdriver
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -285,7 +288,42 @@ def sectorForm(request):
     return render(request, 'sector_form.html', {'info': info})
 
 def sectorPage(request):
-    return render(request, 'sector_page.html')
+    communication_services = Sector.objects.get(sector_name="Communication Services")
+    consumer_descretionary = Sector.objects.get(sector_name="Consumer Discretionary")
+    consumer_staples = Sector.objects.get(sector_name="Consumer Staples")
+    energy = Sector.objects.get(sector_name="Energy")
+    financials = Sector.objects.get(sector_name="Financials")
+    health_care = Sector.objects.get(sector_name="Health Care")
+    industrials = Sector.objects.get(sector_name="Industrials")
+    information_technology = Sector.objects.get(sector_name="Information Technology")
+    materials = Sector.objects.get(sector_name="Materials")
+    real_estate = Sector.objects.get(sector_name="Real Estate")
+    utilities = Sector.objects.get(sector_name="Utilities")
+    context = {
+        'communication_services_name': communication_services.sector_name,
+        'communication_services_pctchange': communication_services.percent_change,
+        'consumer_descretionary_name': consumer_descretionary.sector_name,
+        'consumer_descretionary_pctchange': consumer_descretionary.percent_change,
+        'consumer_staples_name': consumer_staples.sector_name,
+        'consumer_staples_pctchange': consumer_staples.percent_change,
+        'energy_name': energy.sector_name,
+        'energy_pctchange': energy.percent_change,
+        'financials_name': financials.sector_name,
+        'financials_pctchange': financials.percent_change,
+        'health_care_name': health_care.sector_name,
+        'health_care_pctchange': health_care.percent_change,
+        'industrials_name': industrials.sector_name,
+        'industrials_pctchange': industrials.percent_change,
+        'information_technology_name': information_technology.sector_name,
+        'information_technology_pctchange': information_technology.percent_change,
+        'materials_name': materials.sector_name,
+        'materials_pctchange': materials.percent_change,
+        'real_estate_name': real_estate.sector_name,
+        'real_estate_pctchange': real_estate.percent_change,
+        'utilities_name': utilities.sector_name,
+        'utilities_pctchange': utilities.percent_change,
+    }
+    return render(request, 'sector_page.html', context)
 
 @login_required(login_url='login')
 def add_stock(request):
@@ -636,3 +674,79 @@ def UpdateDatabase(request):
             time.sleep(100)
     print("Finished")
     return render(request, 'update_database.html')
+
+@login_required(login_url='login')
+def UpdateSector(request):
+    sector_list = [
+        "Communication Services",
+        "Consumer Discretionary",
+        "Consumer Staples",
+        "Energy",
+        "Financials",
+        "Health Care",
+        "Industrials",
+        "Information Technology",
+        "Materials",
+        "Real Estate",
+        "Utilities"
+    ]
+    # Web scrape from this url
+    my_url = "https://eresearch.fidelity.com/eresearch/goto/markets_sectors/landing.jhtml"
+    # Use webdriver to simulate opening webpage in order to scrape dynamic data
+    driver = webdriver.Chrome('tests/chromedriver.exe')
+    driver.get(my_url)
+    # Find percentage change for each sector through html id's
+    communication_services = driver.find_element_by_id(id_='lc50').text
+    consumer_descretionary = driver.find_element_by_id(id_='lc25').text
+    consumer_staples = driver.find_element_by_id(id_='lc30').text
+    energy = driver.find_element_by_id(id_='lc10').text
+    financials = driver.find_element_by_id(id_='lc40').text
+    health_care = driver.find_element_by_id(id_='lc35').text
+    industrials = driver.find_element_by_id(id_='lc20').text
+    information_technology = driver.find_element_by_id(id_='lc45').text
+    materials = driver.find_element_by_id(id_='lc15').text
+    real_estate = driver.find_element_by_id(id_='lc60').text
+    utilities = driver.find_element_by_id(id_='lc55').text
+
+    for f in range(0, len(sector_list)):
+        try:
+            sector_db = Sector.objects.get(sector_name=sector_list[f])
+            if (sector_list[f] == "Communication Services"):
+                sector_db.percent_change = communication_services
+                sector_db.save()
+            if (sector_list[f] == "Consumer Discretionary"):
+                sector_db.percent_change = consumer_descretionary
+                sector_db.save()
+            if (sector_list[f] == "Consumer Staples"):
+                sector_db.percent_change = consumer_staples
+                sector_db.save()
+            if (sector_list[f] == "Energy"):
+                sector_db.percent_change = energy
+                sector_db.save()
+            if (sector_list[f] == "Financials"):
+                sector_db.percent_change = financials
+                sector_db.save()
+            if (sector_list[f] == "Health Care"):
+                sector_db.percent_change = health_care
+                sector_db.save()
+            if (sector_list[f] == "Industrials"):
+                sector_db.percent_change = industrials
+                sector_db.save()
+            if (sector_list[f] == "Information Technology"):
+                sector_db.percent_change = information_technology
+                sector_db.save()
+            if (sector_list[f] == "Materials"):
+                sector_db.percent_change = materials
+                sector_db.save()
+            if (sector_list[f] == "Real Estate"):
+                sector_db.percent_change = real_estate
+                sector_db.save()
+            if (sector_list[f] == "Utilities"):
+                sector_db.percent_change = utilities
+                sector_db.save()
+            print('Updated: ', sector_list[f])
+
+        except:
+            print("Failed to update database for table: Sectors")
+
+    return render(request, 'update_sector.html')
