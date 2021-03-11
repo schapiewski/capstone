@@ -33,7 +33,6 @@ from .models import Sector
 import pandas as pd
 import plotly.express as px
 import numpy as np
-from bs4 import BeautifulSoup
 from selenium import webdriver
 
 class VerificationView(View):
