@@ -6,43 +6,322 @@
     <div class="row py-3">
         <div class="col-12">
             <div class="recommendationfunction">
-                <h5 style="color:white;width:33%">Select a Sector for Recommendations:</h5>
-                <select name="dropdownplaceholder" id="placeholder" style="width:33%">
-                    <option value="placeholder">Communication Services</option>
-                    <option value="placeholder">Consumer Discretionary</option>
-                    <option value="placeholder">Consumer Staples</option>
-                    <option value="placeholder">Energy</option>
-                    <option value="placeholder">Financials</option>
-                    <option value="placeholder">Health Care</option>
-                    <option value="placeholder">Industrials</option>
-                    <option value="placeholder">Information Technology</option>
-                    <option value="placeholder">Materials</option>
-                    <option value="placeholder">Real Estate</option>
-                    <option value="placeholder">Utilities</option>
+                <h5 style="color:white;width:40%">Select a Sector for Top Performing Stocks:</h5>
+                <select name="dropdownplaceholder" id="dropdown" style="width:40%">
+                    <option value="placeholder" disabled selected>Select a sector...</option>
+                    <option value="communication-services">Communication Services</option>
+                    <option value="consumer-cyclical">Consumer Descretionary</option>
+                    <option value="consumer-staples">Consumer Staples</option>
+                    <option value="energy">Energy</option>
+                    <option value="financials">Financials</option>
+                    <option value="health-care">Health Care</option>
+                    <option value="industrials">Industrials</option>
+                    <option value="technology">Information Technology</option>
+                    <option value="materials">Materials</option>
+                    <option value="real-estate">Real Estate</option>
+                    <option value="utilities">Utilities</option>
                 </select>
             </div>
         </div>
     </div>
     <div class="row">
         <div class="col-xl-8 col-lg-12">
-            <div class="recommendationfunction">
+            <div class="recommendation">
                 <table class="table table-striped">
-                    <thead class="bg-success">
+                    <thead class="thead-light">
                     <tr>
-                        <th scope="col">Sector</th>
+                        <th scope="col">Name</th>
                         <th scope="col">Price ($)</th>
-                        <th scope="col">12-Month P/E Ratio</th>
-                        <th scope="col">Moving Avg (1M)</th>
-                        <th scope="col">Moving Avg (3M)</th>
-                        <th scope="col">Exchange</th>
+                        <th scope="col">Previous Closing Price</th>
+                        <th scope="col">Last % Change</th>
+                        <th scope="col">Yearly High</th>
+                        <th scope="col">Yearly Low</th>
                     </tr>
+                    <tr id="placeholder">
+                        <td colspan="5">Please select sector from the dropdown...</td>
+                    </tr>
+                    {% for list_item in ccf_set %}
+                    <tr class="consumer-cyclical" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if ccf_error == "Yes" %}
+                    <tr class="consumer-cyclical" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in cstf_set %}
+                    <tr class="consumer-staples" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if cstf_error == "Yes" %}
+                    <tr class="consumer-staples" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in tf_set %}
+                    <tr class="technology" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if tf_error == "Yes" %}
+                    <tr class="technology" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in csf_set %}
+                    <tr class="communication-services" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if csf_error == "Yes" %}
+                    <tr class="communication-services" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in ef_set %}
+                    <tr class="energy" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if ef_error == "Yes" %}
+                    <tr class="energy" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in ff_set %}
+                    <tr class="financials" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if ff_error == "Yes" %}
+                    <tr class="financials" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in hcf_set %}
+                    <tr class="health-care" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if hcf_error == "Yes" %}
+                    <tr class="health-care" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in if_set %}
+                    <tr class="industrials" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if if_error == "Yes" %}
+                    <tr class="industrials" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in mf_set %}
+                    <tr class="materials" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if mf_error == "Yes" %}
+                    <tr class="materials" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in ref_set %}
+                    <tr class="real-estate" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if ref_error == "Yes" %}
+                    <tr class="real-estate" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
+                    {% for list_item in uf_set %}
+                    <tr class="utilities" style="display:none">
+                        <td>
+                        <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
+                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        </form>
+                        </td>
+                        <td>${{list_item.current_price}}</td>
+                        <td>${{list_item.previous_closing_price}}</td>
+                        {% if list_item.percentage_change > 0 %}
+                            <td style="color: green">+{{list_item.percentage_change}}%</td>
+                        {% else %}
+                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                        {% endif %}
+                        <td>${{list_item.year_high}}</td>
+                        <td>${{list_item.year_low}}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if uf_error == "Yes" %}
+                    <tr class="utilities" style="display:none">
+                        <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
+                    </tr>
+                    {% endif %}
                     </thead>
                 </table>
             </div>
         </div>
         <div class="col-xl-4 col-lg-12">
             <div class="recommendationoverview">
-                <table class="table table-striped" style="margin: 0px">
+                <table id="sector" class="table table-striped" style="margin: 0px">
                     <thead class="thead-light">
                     <tr>
                         <th scope="col">Sector</th>
@@ -155,6 +434,144 @@
         </div>
     </div>
 </div>
-
+<script>
+  var table, rows, switching, i, x, y, shouldSwitch;
+  table = document.getElementById("sector");
+  switching = true;
+  console.log(table)
+  /*Make a loop that will continue until
+  no switching has been done:*/
+  while (switching) {
+    //start by saying: no switching is done:
+    switching = false;
+    rows = table.rows;
+    console.log(rows)
+    /*Loop through all table rows (except the
+    first, which contains table headers):*/
+    for (i = 1; i < (rows.length - 1); i++) {
+      //start by saying there should be no switching:
+      shouldSwitch = false;
+      /*Get the two elements you want to compare,
+      one from current row and one from the next:*/
+      x = rows[i].getElementsByTagName("TD")[1];
+      y = rows[i + 1].getElementsByTagName("TD")[1];
+      //check if the two rows should switch place:
+      if (Number(x.innerHTML.slice(0, -1)) < Number(y.innerHTML.slice(0, -1))) {
+        //if so, mark as a switch and break the loop:
+        shouldSwitch = true;
+        break;
+      }
+    }
+    if (shouldSwitch) {
+      /*If a switch has been marked, make the switch
+      and mark that a switch has been done:*/
+      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
+      switching = true;
+    }
+  }
+</script>
+<script>
+$(document).ready(function(){
+console.log($('#dropdown').val())
+    $('#dropdown').on('change', function() {
+      if ( this.value == 'placeholder')
+      {
+        $("#placeholder").show();
+      }
+      else
+      {
+        $("#placeholder").hide();
+      }
+      if ( this.value == 'consumer-cyclical')
+      {
+        $(".consumer-cyclical").show();
+      }
+      else
+      {
+        $(".consumer-cyclical").hide();
+      }
+      if ( this.value == 'technology')
+      {
+        $(".technology").show();
+      }
+      else
+      {
+        $(".technology").hide();
+      }
+      if ( this.value == 'communication-services')
+      {
+        $(".communication-services").show();
+      }
+      else
+      {
+        $(".communication-services").hide();
+      }
+      if ( this.value == 'energy')
+      {
+        $(".energy").show();
+      }
+      else
+      {
+        $(".energy").hide();
+      }
+      if ( this.value == 'financials')
+      {
+        $(".financials").show();
+      }
+      else
+      {
+        $(".financials").hide();
+      }
+      if ( this.value == 'health-care')
+      {
+        $(".health-care").show();
+      }
+      else
+      {
+        $(".health-care").hide();
+      }
+      if ( this.value == 'industrials')
+      {
+        $(".industrials").show();
+      }
+      else
+      {
+        $(".industrials").hide();
+      }
+      if ( this.value == 'materials')
+      {
+        $(".materials").show();
+      }
+      else
+      {
+        $(".materials").hide();
+      }
+      if ( this.value == 'real-estate')
+      {
+        $(".real-estate").show();
+      }
+      else
+      {
+        $(".real-estate").hide();
+      }
+      if ( this.value == 'utilities')
+      {
+        $(".utilities").show();
+      }
+      else
+      {
+        $(".utilities").hide();
+      }
+      if ( this.value == 'consumer-staples')
+      {
+        $(".consumer-staples").show();
+      }
+      else
+      {
+        $(".consumer-staples").hide();
+      }
+    });
+});
+</script>
 
 {% endblock %}

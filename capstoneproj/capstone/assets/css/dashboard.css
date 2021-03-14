@@ -173,11 +173,23 @@ label{
     border-color: transparent!important;
 }
 .ticker-header{
+   text-align: left!important;
    background: transparent!important;
    border: none!important;
    color: #1ab188!important;
 }
 
+.ticker-header:focus{
+    outline: unset;
+}
 .ticker-header:hover{
    color: #16906f!important;
+}
+
+#sector {
+    box-shadow: 10px 10px 15px black!important;
+}
+
+.recommendation{
+    box-shadow: 10px 10px 15px black!important;
 }

@@ -299,6 +299,187 @@ def sectorPage(request):
     materials = Sector.objects.get(sector_name="Materials")
     real_estate = Sector.objects.get(sector_name="Real Estate")
     utilities = Sector.objects.get(sector_name="Utilities")
+    # Consumer Cyclical Top Performing Stocks
+    try:
+        consumer_cyclical_filter = Ticker.objects.filter(sector="Consumer Cyclical")
+        ccf_q2 = consumer_cyclical_filter.order_by('-percentage_change')[0]
+        ccf_q3 = consumer_cyclical_filter.order_by('-percentage_change')[1]
+        ccf_q4 = consumer_cyclical_filter.order_by('-percentage_change')[2]
+        ccf_set = []
+        ccf_set.append(ccf_q2)
+        ccf_set.append(ccf_q3)
+        ccf_set.append(ccf_q4)
+        print(ccf_set)
+        ccf_error = "None"
+    except:
+        ccf_set = []
+        ccf_error = "Yes"
+    # Consumer Staples Top Performing Stocks
+    try:
+        consumer_staples_filter = Ticker.objects.filter(sector="Consumer Defensive")
+        cstf_q2 = consumer_staples_filter.order_by('-percentage_change')[0]
+        cstf_q3 = consumer_staples_filter.order_by('-percentage_change')[1]
+        cstf_q4 = consumer_staples_filter.order_by('-percentage_change')[2]
+        cstf_set = []
+        cstf_set.append(cstf_q2)
+        cstf_set.append(cstf_q3)
+        cstf_set.append(cstf_q4)
+        print(cstf_set)
+        cstf_error = "None"
+    except:
+        cstf_set = []
+        cstf_error = "Yes"
+    # Technology Top Performing Stocks
+    try:
+        technology_filter = Ticker.objects.filter(sector="Technology")
+        tf_q2 = technology_filter.order_by('-percentage_change')[0]
+        tf_q3 = technology_filter.order_by('-percentage_change')[1]
+        tf_q4 = technology_filter.order_by('-percentage_change')[2]
+        tf_set = []
+        tf_set.append(tf_q2)
+        tf_set.append(tf_q3)
+        tf_set.append(tf_q4)
+        print(tf_set)
+        tf_error = "None"
+    except:
+        tf_set = []
+        tf_error = "Yes"
+    # Communication Services Top Performing Stocks
+    try:
+        communication_services_filter = Ticker.objects.filter(sector="Communication Services")
+        csf_q2 = communication_services_filter.order_by('-percentage_change')[0]
+        csf_q3 = communication_services_filter.order_by('-percentage_change')[1]
+        csf_q4 = communication_services_filter.order_by('-percentage_change')[2]
+        csf_set = []
+        csf_set.append(csf_q2)
+        csf_set.append(csf_q3)
+        csf_set.append(csf_q4)
+        print(csf_set)
+        csf_error = "None"
+    except:
+        csf_set = []
+        csf_error = "Yes"
+    # Communication Services Top Performing Stocks
+    try:
+        communication_services_filter = Ticker.objects.filter(sector="Communication Services")
+        csf_q2 = communication_services_filter.order_by('-percentage_change')[0]
+        csf_q3 = communication_services_filter.order_by('-percentage_change')[1]
+        csf_q4 = communication_services_filter.order_by('-percentage_change')[2]
+        csf_set = []
+        csf_set.append(csf_q2)
+        csf_set.append(csf_q3)
+        csf_set.append(csf_q4)
+        print(csf_set)
+        csf_error = "None"
+    except:
+        csf_set = []
+        csf_error = "Yes"
+    # Energy Top Performing Stocks
+    try:
+        energy_filter = Ticker.objects.filter(sector="Energy")
+        ef_q2 = energy_filter.order_by('-percentage_change')[0]
+        ef_q3 = energy_filter.order_by('-percentage_change')[1]
+        ef_q4 = energy_filter.order_by('-percentage_change')[2]
+        ef_set = []
+        ef_set.append(ef_q2)
+        ef_set.append(ef_q3)
+        ef_set.append(ef_q4)
+        print(ef_set)
+        ef_error = "None"
+    except:
+        ef_set = []
+        ef_error = "Yes"
+    # Financials Top Performing Stocks
+    try:
+        financials_filter = Ticker.objects.filter(sector="Financial Services")
+        ff_q2 = financials_filter.order_by('-percentage_change')[0]
+        ff_q3 = financials_filter.order_by('-percentage_change')[1]
+        ff_q4 = financials_filter.order_by('-percentage_change')[2]
+        ff_set = []
+        ff_set.append(ff_q2)
+        ff_set.append(ff_q3)
+        ff_set.append(ff_q4)
+        print(ff_set)
+        ff_error = "None"
+    except:
+        ff_set = []
+        ff_error = "Yes"
+    # Health Care Top Performing Stocks
+    try:
+        health_care_filter = Ticker.objects.filter(sector="Healthcare")
+        hcf_q2 = health_care_filter.order_by('-percentage_change')[0]
+        hcf_q3 = health_care_filter.order_by('-percentage_change')[1]
+        hcf_q4 = health_care_filter.order_by('-percentage_change')[2]
+        hcf_set = []
+        hcf_set.append(hcf_q2)
+        hcf_set.append(hcf_q3)
+        hcf_set.append(hcf_q4)
+        print(hcf_set)
+        hcf_error = "None"
+    except:
+        hcf_set = []
+        hcf_error = "Yes"
+    # Industrials Top Performing Stocks
+    try:
+        industrials_filter = Ticker.objects.filter(sector="Industrials")
+        if_q2 = industrials_filter.order_by('-percentage_change')[0]
+        if_q3 = industrials_filter.order_by('-percentage_change')[1]
+        if_q4 = industrials_filter.order_by('-percentage_change')[2]
+        if_set = []
+        if_set.append(if_q2)
+        if_set.append(if_q3)
+        if_set.append(if_q4)
+        print(if_set)
+        if_error = "None"
+    except:
+        if_set = []
+        if_error = "Yes"
+    # Materials Top Performing Stocks
+    try:
+        materials_filter = Ticker.objects.filter(sector="Basic Materials")
+        mf_q2 = materials_filter.order_by('-percentage_change')[0]
+        mf_q3 = materials_filter.order_by('-percentage_change')[1]
+        mf_q4 = materials_filter.order_by('-percentage_change')[2]
+        mf_set = []
+        mf_set.append(mf_q2)
+        mf_set.append(mf_q3)
+        mf_set.append(mf_q4)
+        print(mf_set)
+        mf_error = "None"
+    except:
+        mf_set = []
+        mf_error = "Yes"
+    # Real Estate Top Performing Stocks
+    try:
+        real_estate_filter = Ticker.objects.filter(sector="Real Estate")
+        ref_q2 = real_estate_filter.order_by('-percentage_change')[0]
+        ref_q3 = real_estate_filter.order_by('-percentage_change')[1]
+        ref_q4 = real_estate_filter.order_by('-percentage_change')[2]
+        ref_set = []
+        ref_set.append(ref_q2)
+        ref_set.append(ref_q3)
+        ref_set.append(ref_q4)
+        print(ref_set)
+        ref_error = "None"
+    except:
+        ref_set = []
+        ref_error = "Yes"
+    # Utilities Top Performing Stocks
+    try:
+        utilities_filter = Ticker.objects.filter(sector="Utilities")
+        uf_q2 = utilities_filter.order_by('-percentage_change')[0]
+        uf_q3 = utilities_filter.order_by('-percentage_change')[1]
+        uf_q4 = utilities_filter.order_by('-percentage_change')[2]
+        uf_set = []
+        uf_set.append(uf_q2)
+        uf_set.append(uf_q3)
+        uf_set.append(uf_q4)
+        print(uf_set)
+        uf_error = "None"
+    except:
+        uf_set = []
+        uf_error = "Yes"
+
     context = {
         'communication_services_name': communication_services.sector_name,
         'communication_services_pctchange': communication_services.percent_change,
@@ -322,6 +503,28 @@ def sectorPage(request):
         'real_estate_pctchange': real_estate.percent_change,
         'utilities_name': utilities.sector_name,
         'utilities_pctchange': utilities.percent_change,
+        'ccf_set': ccf_set,
+        'ccf_error': ccf_error,
+        'tf_set': tf_set,
+        'tf_error': tf_error,
+        'csf_set': csf_set,
+        'csf_error': csf_error,
+        'ef_set': ef_set,
+        'ef_error': ef_error,
+        'ff_set': ff_set,
+        'ff_error': ff_error,
+        'hcf_set': hcf_set,
+        'hcf_error': hcf_error,
+        'if_set': if_set,
+        'if_error': if_error,
+        'mf_set': mf_set,
+        'mf_error': mf_error,
+        'ref_set': ref_set,
+        'ref_error': ref_error,
+        'uf_set': uf_set,
+        'uf_error': uf_error,
+        'cstf_set': cstf_set,
+        'cstf_error': cstf_error,
     }
     return render(request, 'sector_page.html', context)
 
