@@ -30,6 +30,7 @@ from alpha_vantage.techindicators import TechIndicators
 import datetime
 from .models import Ticker
 from .models import Sector
+from .models import OwnedPackage
 import pandas as pd
 import plotly.express as px
 import numpy as np
@@ -68,6 +69,9 @@ def register(request):
             #Initialize user as inactive
             user.is_active = False
             user.save()
+            #adds a user to package table
+            package = OwnedPackage(user=user)
+            package.save()
             uidb64=urlsafe_base64_encode(force_bytes(user.pk))
             #Get domain
             domain=get_current_site(request).domain
@@ -105,7 +109,11 @@ def loginPage(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            return redirect('../')
+            if OwnedPackage.objects.get(user=request.user).packageNum == -1:
+                messages.info(request, 'Your portfolio does not have an associated package, please select one from below.')
+                return redirect('../pricing/')
+            else:
+                return redirect('../')
         else:
             messages.error(request, 'Username or password is incorrect. Or check your email for an activation link.')
             return render(request, 'login.html')
@@ -266,25 +274,29 @@ def show_stock_graph(request):
         return render(request, 'show_graph.html')
 
 def pricing(request):
-    return render(request, 'pricing.html')
-
-def sectorForm(request):
-    print(request.POST)
-    info = [None, None, None]
-    packages = {'Starter' : '1', 'Deluxe' : '2', 'Ultimate': '3'}
+    context = {}
     if request.method == 'POST':
-        info[0] = request.POST['sector']
-        print(info[0])
-        if request.POST['package'] == 'starter':
-            info[1] = packages['Starter']
-        elif request.POST['package'] == 'deluxe':
-            info[1] = packages['Deluxe']
-        elif request.POST['package'] == 'ultimate':
-            info[1] = packages['Ultimate']
-        info[2] = 'Includes ' + info[1] + ' tickers supported by our recommendation system'
+        userPackage = OwnedPackage.objects.get(user=request.user)
+        if 'starter_submit' in request.POST:
+            if userPackage.packageNum != 0:
+                userPackage.packageNum = 0
+                messages.success(request, 'Successfully added Starter Package to account')
+                userPackage.save()
+                return redirect('../')
+        elif 'deluxe_submit' in request.POST:
+            if userPackage.packageNum != 1:
+                userPackage.packageNum = 1
+                messages.success(request, 'Successfully added Deluxe Package to account')
+                userPackage.save()
+                return redirect('../')
+        elif 'ultimate_submit' in request.POST:
+            if userPackage.packageNum != 2:
+                userPackage.packageNum = 2
+                messages.success(request, 'Successfully added Ultimate Package to account')
+                userPackage.save()
+                return redirect('../')
 
-    print({'info': info})
-    return render(request, 'sector_form.html', {'info': info})
+    return render(request, 'pricing.html', {'num': OwnedPackage.objects.get(user=request.user).packageNum})
 
 def sectorPage(request):
     communication_services = Sector.objects.get(sector_name="Communication Services")

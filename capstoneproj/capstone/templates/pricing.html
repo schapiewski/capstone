@@ -17,18 +17,15 @@
     <!-- Bootstrap core CSS -->
     <link href="../assets/dist/css/bootstrap.min.css" rel="stylesheet">
 
-    <style>
-        .container {
-          max-width: 960px;
-        }
+<!--    <style>-->
+<!--        .container {-->
+<!--          max-width: 960px;-->
+<!--        }-->
 
-        .pricing-header {
-          max-width: 700px;
-        }
-        hr.green {
-            border: 5px solid red !important;
-        }
-    </style>
+<!--        .pricing-header {-->
+<!--          max-width: 700px;-->
+<!--        }-->
+<!--    </style>-->
 
 
     <!-- Custom styles for this template -->
@@ -68,13 +65,22 @@
                             </svg>Recommended Hold/Sell
                         </li>
                     </ul>
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'sector_form' %}"><button type="button" class="w-100 btn btn-lg btn-primary">Add to Portfolio</button></a>
+                    {% if user.is_authenticated %} <!-- if user already has package switch button text with update package-->
+                        {% if num == -1 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#starterConfirmation"> Add to Portfolio </button>
+                        {% elif num == 0 %}
+                            <div class="alert alert-secondary"> Already Owned </div>
+                        {% elif num == 1 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#starterConfirmation"> Downgrade to Starter </button>
+                        {% elif num == 2 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#starterConfirmation"> Downgrade to Starter </button>
+                        {% endif %}
                     {% else %}
                     <div class="alert alert-secondary"> Create an Account or Log in. </div>
                     {% endif %}
-                    <hr/>
-                    <p class="text-left">Want to choose what sector to invest in? <a href="#">Click Here</a></p>
+
+                    <hr style = 'border: 1px solid #1AB188;'>
+                    <p class="text-left"> Need help deciding what sector to invest in? <a href="{% url 'sector_page' %}">Click Here</a></p>
                 </div>
             </div>
         </div>
@@ -103,13 +109,22 @@
                             </svg>Recommended Hold/Sell
                         </li>
                     </ul>
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'sector_form' %}"><button type="button" class="w-100 btn btn-lg btn-primary">Add to Portfolio</button></a>
+                    {% if user.is_authenticated %} <!-- if user already has package switch button text with update package-->
+                        {% if num == -1 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#deluxeConfirmation"> Add to Portfolio </button>
+                        {% elif num == 0 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#deluxeConfirmation"> Upgrade to Deluxe </button>
+                        {% elif num == 1 %}
+                            <div class="alert alert-secondary"> Already Owned </div>
+                        {% elif num == 2 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#deluxeConfirmation"> Downgrade to Deluxe </button>
+                        {% endif %}
                     {% else %}
                     <div class="alert alert-secondary"> Create an Account or Log in. </div>
                     {% endif %}
-                    <hr/>
-                    <p class="text-left">Want to choose what sector to invest in? <a href="#">Click Here</a></p>
+
+                    <hr style = 'border: 1px solid #1AB188;'>
+                    <p class="text-left"> Need help deciding what sector to invest in? <a href="{% url 'sector_page' %}">Click Here</a></p>
                 </div>
             </div>
         </div>
@@ -138,18 +153,106 @@
                             </svg>Recommended Hold/Sell
                         </li>
                     </ul>
-                    {% if user.is_authenticated %}
-                    <a href="{% url 'sector_form' %}"><button type="button" class="w-100 btn btn-lg btn-primary">Add to Portfolio</button></a>
+                    {% if user.is_authenticated %} <!-- if user already has package switch button text with update package-->
+                        {% if num == -1 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#ultimateConfirmation"> Add to Portfolio </button>
+                        {% elif num == 0 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#ultimateConfirmation"> Upgrade to Ultimate </button>
+                        {% elif num == 1 %}
+                            <button type="button" class="w-100 btn btn-lg btn-primary" data-toggle="modal" data-target="#ultimateConfirmation"> Upgrade to Ultimate </button>
+                        {% elif num == 2 %}
+                            <div class="alert alert-secondary"> Already Owned </div>
+                        {% endif %}
                     {% else %}
                     <div class="alert alert-secondary"> Create an Account or Log in. </div>
                     {% endif %}
-                    <hr class="green">
-                    <p class="text-left">Want to choose what sector to invest in? <a href="#">Click Here</a></p>
+
+                    <hr style = 'border: 1px solid #1AB188;'>
+                    <p class="text-left"> Need help deciding what sector to invest in? <a href="{% url 'sector_page' %}">Click Here</a></p>
 
                 </div>
             </div>
         </div>
     </div>
+
+    <!--starter popup-->
+    <div class="modal fade" id="starterConfirmation" tabindex="-1" role="dialog" aria-labelledby="deluxeConfirmation" aria-hidden="true">
+        <div class="modal-dialog " role="document" style="top: 250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="starterConfirmationTitle">Starter Package Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The Starter Package includes 1 ticker supported by our recommendation system.
+                    <br><br>
+                    Click Confirm Package to choose this package.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form method = 'POST'>
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" name="starter_submit">Confirm Package</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--deluxe popup-->
+    <div class="modal fade" id="deluxeConfirmation" tabindex="-1" role="dialog" aria-labelledby="deluxeConfirmation" aria-hidden="true">
+        <div class="modal-dialog " role="document" style="top: 250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deluxeConfirmationTitle">Deluxe Package Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The Deluxe Package includes 3 ticker supported by our recommendation system.
+                    <br><br>
+                    Click Confirm Package to choose this package.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form method = 'POST'>
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" name="deluxe_submit">Confirm Package</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--ultimate popup-->
+    <div class="modal fade" id="ultimateConfirmation" tabindex="-1" role="dialog" aria-labelledby="ultimateConfirmation" aria-hidden="true">
+        <div class="modal-dialog " role="document" style="top: 250px;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="ultimateConfirmationTitle">Ultimate Package Confirmation</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    The Ultimate Package includes 5 ticker supported by our recommendation system.
+                    <br><br>
+                    Click Confirm Package to choose this package.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <form method = 'POST'>
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-primary" name="ultimate_submit">Confirm Package</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </main>
 
 
