@@ -1,6 +1,16 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
+class OwnedPackage(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    packageNum = models.IntegerField(default=-1)
+
+    def __str__(self):
+
+        return str(self.user)
+
+
 class Stock(models.Model):
     ticker = models.CharField(max_length=10)
 
