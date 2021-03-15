@@ -30,6 +30,7 @@ from alpha_vantage.techindicators import TechIndicators
 import datetime
 from .models import Ticker
 from .models import Sector
+from .models import OwnedPackage
 import pandas as pd
 import plotly.express as px
 import numpy as np
