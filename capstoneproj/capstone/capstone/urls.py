@@ -28,7 +28,6 @@ urlpatterns = [
     path('updateinfo/', views.updateinfo, name='updateinfo'),
     path('show_graph/', views.show_stock_graph, name="show_graph"),
     path('pricing/', views.pricing, name='pricing'),
-    path('sector_form/', views.sectorForm, name='sector_form'),
     #added
     path('sector_page/', views.sectorPage, name='sector_page'),
     #added
