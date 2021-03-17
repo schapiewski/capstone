@@ -1,6 +1,13 @@
 {% extends 'base.html' %}
 {% block content %}
-
+{% if message and package == -1 %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+  <strong>No Package Detected!</strong> Please choose one of our package deals found <a href="http://127.0.0.1:8000/pricing/">here</a>.
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+{% endif %}
 <h1>My Stock Portfolio</h1>
 <br/>
 
@@ -27,8 +34,8 @@
     </tr>
   </thead>
   <tbody>
-
 {% if output %}
+{% if users_stocks %}
             {% for list_item in users_stocks %}
             <tr class="fix-hover">
                 <th scope="row">
@@ -56,6 +63,7 @@
   </tbody>
 </table>
 </div>
+{% endif %}
 {% endif %}
 
 {% endblock %}
