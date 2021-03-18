@@ -111,6 +111,33 @@
           </tr>
           </tbody>
         </table>
+                  <table class="table table-striped">
+          <thead class="thead-light">
+          <tr>
+            <th scope="col">Current Price</th>
+            <th scope="col">Previous Closing</th>
+            <th scope="col">Yearly High</th>
+            <th scope="col">Year Low</th>
+            <th scope="col">Market Cap</th>
+            <th scope="col">MACD Value</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr>
+            <td>${{currentPrice}}</td>
+            <td>${{previousClosingPrice}}</td>
+            <td>${{yearhigh}}</td>
+            <td>${{yearlow}}</td>
+            <td>${{marketcap}}</td>
+            <td>{{macd}}</td>
+          </tr>
+          </tbody>
+        </table>
+          <div style = 'text-align: justify; text-justify: inter-word;'>
+            <hr style = 'border: 1px solid #1AB188;'>
+            <div style = 'font-size: 20px; text-align: center;'><u>Business Summary</u></div>
+            {{summary}}
+          </div>
           </div>
       </div>
       <br>

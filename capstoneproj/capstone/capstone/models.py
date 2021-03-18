@@ -10,6 +10,28 @@ class OwnedPackage(models.Model):
 
         return str(self.user)
 
+class StockJSON(models.Model):
+    ticker = models.CharField(max_length=10, unique=True)
+    stock_name = models.CharField(max_length=100)
+    ownedBy = models.ManyToManyField(User)
+
+    info = models.JSONField()
+
+    sector = models.CharField(max_length=30)
+    market_cap = models.CharField(max_length=30)
+    year_high = models.DecimalField(decimal_places=2, max_digits=10000)
+    year_low = models.DecimalField(decimal_places=2, max_digits=10000)
+
+    percentage_change = models.DecimalField(decimal_places=2, max_digits=10000)
+    price_change = models.DecimalField(decimal_places=2, max_digits=10000)
+    current_price = models.DecimalField(decimal_places=2, max_digits=10000)
+    previous_closing_price = models.DecimalField(decimal_places=2, max_digits=10000)
+
+    historic_monthly = models.JSONField(default = dict())
+    historic_yearly = models.JSONField(default = dict())
+
+    def __str__(self):
+        return self.ticker
 
 class Stock(models.Model):
     ticker = models.CharField(max_length=10)
