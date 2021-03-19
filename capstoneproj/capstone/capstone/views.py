@@ -107,6 +107,7 @@ def register(request):
     context = {'form': form}
     return render(request, 'register.html', context)
 
+
 def loginPage(request):
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -126,9 +127,11 @@ def loginPage(request):
     context = {}
     return render(request, 'login.html', context)
 
+
 def logoutUser(request):
     logout(request)
     return redirect('login')
+
 
 @login_required(login_url='login')
 def dashboard(request):
@@ -146,6 +149,7 @@ def dashboard(request):
     # else:
     #     return render(request, 'dashboard.html', {'tickerModel': "Enter a tickerModel Symbol Above..."})
 
+
 @login_required(login_url='login')
 def updateinfo(request):
     form = UpdateInfoForm()
@@ -159,6 +163,7 @@ def updateinfo(request):
         form = UpdateInfoForm(instance=request.user)
     context = {'form': form}
     return render(request, 'updateinfo.html', context)
+
 
 def show_stock_graph(request):
     api_key = 'I2CGXL68P1CJ9XNP'
@@ -291,9 +296,6 @@ def show_stock_graph(request):
     else:
         return render(request, 'show_graph.html')
 
-# def pricing(request):
-#     return render(request, 'pricing.html')
-
 
 def pricing(request):
     context = {}
@@ -319,6 +321,7 @@ def pricing(request):
                 return redirect('../')
 
     return render(request, 'pricing.html', {'num': OwnedPackage.objects.get(user=request.user).packageNum})
+
 
 def sectorPage(request):
     communication_services = Sector.objects.get(sector_name="Communication Services")
@@ -944,7 +947,8 @@ def UpdateDatabase(request):
         # add more suffixes if you need them
         return '%.2f%s' % (num, ['', 'K', 'M', 'G', 'T', 'P'][magnitude])
 
-    #takes in dateframe of stock data, and number of months for historic data
+    #takes in dataframe of stock data, and number of months for historic data
+    #returns all sells and dates, also returns an average percent change for the each month
     def historic_return_monthly(data, n):
         date = datetime.datetime.now()
         months = []
@@ -959,8 +963,6 @@ def UpdateDatabase(request):
                 months.append(12)
             elif temp < 0:
                 months.append(temp + 12)
-
-        print(months)
 
         initial = 0  # initial value, might not be needed
         change = []  # between buy and sell
@@ -1010,39 +1012,78 @@ def UpdateDatabase(request):
         MonthChangeDF.drop(['Month'], axis=1, inplace=True)
         ###########################################
         # right now months arent unique
-        #
         ###############################################
-        print(MonthChangeDF)
 
+        #return (date, change) and (month, change)
         return dateChangeDF, MonthChangeDF
 
     #expects dataframe of stock info, goes back as many years as possible
+    #returns array of (date, year average)
     def historic_return_yearly(data):
         date = datetime.datetime.now()
-        years = []
-        print(data.index[0].year)
+        years = []  # for checking years already added
+        dates = []  # full dates for each year
+
         for i in data.index:
             if i.year < date.year and i.year not in years:
                 years.append(i.year)
-        print(years)
-        return None
+                dates.append(i)
+
+
+        initial = 0  # initial value, might not be needed
+        change = []  # between buy and sell for year
+        previous = None  # value for the day before
+        initial_flag = True  # for first if to run only on first loop
+        sold = True  # if it was just sold
+        current = 0  # current closing value with hold period
+        current_year = data.index[0]  # current year being calculated
+        year_change = [] #average percent change for year
+
+        for i in data.index:
+            if i.year != current_year.year:
+                year_change.append([current_year, (sum(change) / len(change)) * 100])
+                current_year = i
+                change = []
+            if initial_flag and data.loc[i]['Recommendation'] == 'Buy (Hold)':
+                initial = data.loc[i]['Close']
+                current = data.loc[i]['Close']
+                previous = i
+                initial_flag = False
+                sold = False
+            elif sold and data.loc[i]['Recommendation'] == 'Buy (Hold)' and data.loc[previous][
+                'Recommendation'] == 'Sell':
+                current = data.loc[i]['Close']
+                sold = False
+                previous = i
+            elif not sold and data.loc[i]['Recommendation'] == 'Sell' and data.loc[previous][
+                'Recommendation'] == 'Buy (Hold)':
+                temp = data.loc[i]['Close']
+                change.append((temp - current) / current)
+                sold = True
+                previous = i
+        #uncomment if 2021 is needed
+        # year_change.append([current_year, (sum(change) / len(change))])
+        year_changeDF = pd.DataFrame(year_change, columns=['Year', 'Percent Change'])
+        year_changeDF = year_changeDF.set_index(year_changeDF['Year'])
+        year_changeDF.drop(['Year'], axis=1, inplace=True)
+        return year_changeDF
 
     #calaculate ema
     #save  a original ema value array, each update pull last ema calculate new one save
     #array of closed values with last one being the current day, n = n-day ema to calculate, n<= total close values
-    def ema_initial(close, n): #outputs ema array (old->new)
+    def ema_initial(close, n):  # outputs ema array (old->new)
         ema = []
         sma = sum(close[:n])
-        ema.append(sma/n)
+        ema.append(sma / n)
         for i in range(n, len(close)):
-            weight = 2/(1 + n)
+            weight = 2 / (1 + n)
             ema.append((close[i] * weight) + (ema[-1] * (1 - weight)))
-        print('current days ', n, '- day ema: ', ema[-1])
+        #print('current days ', n, '- day ema: ', ema[-1])
         return ema
 
     def macd_initial(twelve, tsix):
         macdArray = []
-        #goes in reverse to the the mismatch in lengths of 26-day emas vs 12-day emas
+        # goes in reverse to the the mismatch in lengths of 26-day emas vs 12-day emas
         for i in range(len(tsix) - 1, -1, -1):
             macdArray.append(twelve[i] - tsix[i])
 
@@ -1050,44 +1091,75 @@ def UpdateDatabase(request):
         return [ele for ele in reversed(macdArray)]
 
     # returns single value, but takes in oldemas [-1] is newest
-    def ema_new(oldEmas, close, n):
-        weight = 2 / (1 + n)
-        newEma = (close * weight) + (oldEmas[-1] * (1 - weight))
-        return newEma
+    # def ema_new(oldEmas, close, n):
+    #     weight = 2 / (1 + n)
+    #     newEma = (close * weight) + (oldEmas[-1] * (1 - weight))
+    #     return newEma
 
     # --------------------------------------------------------------------------------------------------------------#
+    # --------------------------------------------------------------------------------------------------------------#
 
-    #df = pd.read_json(result, orient='index') reading in
+    #df = pd.read_json(result, orient='index') for reading in from database
     df = pd.read_csv('capstone/sp500.csv')
     #test_symbols = ['AMZN']
     # for ticker in test_symbols:
     with alive_bar(len(df)) as bar:
         count = 0
         for index, ticker in df.iterrows():
-            if count == 203:
-                break
-            count += 1
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)
             stockInfo = stock.info
+
             stockData = stockData.drop(columns=['Dividends', 'Stock Splits'])
             stockData.insert(0, 'Symbol', ticker)
-            temp = []
-            for i in range(stockData.shape[0]):
-                num = random.randint(0, 1)
-                if num == 0:
-                    temp.append('Buy (Hold)')
-                else:
-                    temp.append('Sell')
 
+            #adding empty columns
             stockData.insert(stockData.shape[1], 'EMA12', 0)
             stockData.insert(stockData.shape[1], 'EMA26', 0)
             stockData.insert(stockData.shape[1], 'MACD', 0)
             stockData.insert(stockData.shape[1], 'MACDSignal', 0)
-            stockData.insert(stockData.shape[1], 'Recommendation', temp)
+            stockData.insert(stockData.shape[1], 'Recommendation', 'Sell')
 
-            # Grab specific stock data from stock.info
+            #calculating ema12, adjusting its size to match dataframe  and adding to dataframe
+            ema12 = ema_initial(stockData['Close'], 12)
+            ema12_adjusted = [ema12[0]] * 11
+            ema12_adjusted.extend(ema12)
+            stockData['EMA12'] = ema12_adjusted
+
+            #calculating ema26, adjusting its size to match dataframe  and adding to dataframe
+            ema26 = ema_initial(stockData['Close'], 26)
+            ema26_adjusted = [ema26[0]] * 25
+            ema26_adjusted.extend(ema26)
+            stockData['EMA26'] = ema26_adjusted
+
+            #calculating macd and adding to dataframe
+            macd = macd_initial(ema12_adjusted, ema26_adjusted)
+            stockData['MACD'] = macd
+
+            #calculating macdSignal, adjusting its size to match dataframe and adding to dataframe
+            macdSignal = ema_initial(macd, 9)
+            macdSignal_adjusted = [macd[0]] * 8
+            macdSignal_adjusted.extend(macdSignal)
+            stockData['MACDSignal'] = macdSignal_adjusted
+
+            #finding buy or sell and add to dataframe
+            for i in stockData.index:
+                if stockData.loc[i, 'MACD'] >= stockData.loc[i, 'MACDSignal']:
+                    stockData.loc[i, 'Recommendation'] = 'Buy (Hold)'
+                else:
+                    stockData.loc[i, 'Recommendation'] = 'Sell'
+
+            #dataframes: dateChange = sell day, change for all 12 months
+            #monthlyChange = just month, average percent change for month
+            dateChange, monthlyChange = historic_return_monthly(stockData, 12)
+
+
+            #dataframe: (year, percent change)
+            yearChange = historic_return_yearly(stockData)
+
+            # Tries to grab specific stock data from stock.info
+            # if info we want not found ignore stock
             try:
                 stockName = stockInfo['longName']
                 sector = stockInfo['sector']
@@ -1113,10 +1185,10 @@ def UpdateDatabase(request):
             try:
                 test = StockJSON.objects.get(ticker=ticker)
                 #commment this out if an item to be updated
-                if stockData.index[-1].date() == datetime.datetime.now().date():
-                    print(ticker, 'is already up to date    ')
-                    bar()
-                    continue
+                # if stockData.index[-1].date() == datetime.datetime.now().date():
+                #     print(ticker, 'is already up to date    ')
+                #     bar()
+                #     continue
                 #print('Updating ', stockName, '...')
                 test.stock_name = stockName
                 test.sector = sector
@@ -1128,7 +1200,12 @@ def UpdateDatabase(request):
                 test.year_low = yearlow
                 test.price_change = priceChange
 
+                monthly = monthlyChange.to_json(orient="index")
+                yearly = yearChange.to_json(orient="index")
                 result = stockData.to_json(orient="index")
+
+                test.historic_monthly = monthly
+                test.historic_yearly = yearly
                 test.info = result
 
                 test.save()
@@ -1138,14 +1215,18 @@ def UpdateDatabase(request):
             except:
                 #print("Creating ", stockName, "...")
                 result = stockData.to_json(orient="index")
+                monthly = monthlyChange.to_json(orient="index")
+                yearly = yearChange.to_json(orient="index")
 
                 test = StockJSON(ticker=ticker, stock_name=stockName, sector=sector, market_cap=marketcap,
-                              current_price=currentPrice, previous_closing_price=previousClosingPrice,
-                              percentage_change=percentageChange, year_high=yearhigh, year_low=yearlow,
-                              price_change=priceChange, info=result)
+                                 current_price=currentPrice, previous_closing_price=previousClosingPrice,
+                                 percentage_change=percentageChange, year_high=yearhigh, year_low=yearlow,
+                                 price_change=priceChange, info=result, historic_monthly=monthly,
+                                 historic_yearly=yearly)
                 #print("Saving ", test.stock_name, " to the Database...")
                 test.save()
             bar()
+            break
     print("Finished")
     return render(request, 'update_database.html')
 
