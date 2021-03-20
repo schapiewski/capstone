@@ -1,4 +1,4 @@
-#!c:\users\shawn\documents\github\capstone\capstoneproj\venv\scripts\python.exe
+#!c:\users\nickw\documents\github\capstone\capstoneproj\venv\scripts\python.exe
 # EASY-INSTALL-ENTRY-SCRIPT: 'yfinance==0.1.55','console_scripts','sample'
 import re
 import sys

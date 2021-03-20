@@ -1,4 +1,4 @@
-#!c:\users\shawn\documents\github\capstone\capstoneproj\venv\scripts\python.exe
+#!c:\users\nickw\documents\github\capstone\capstoneproj\venv\scripts\python.exe
 # EASY-INSTALL-ENTRY-SCRIPT: 'dash==1.19.0','console_scripts','dash-generate-components'
 import re
 import sys
