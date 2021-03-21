@@ -33,15 +33,14 @@ urlpatterns = [
     #added
     path('update_database/', views.UpdateDatabase, name='update_database'),
     path('update_sector/', views.UpdateSector, name='update_sector'),
-    path('add_stock.html', views.add_stock, name="add_stock"),
-    #path('delete/<stock_id>', views.delete, name="delete"),
+    path('viewPortfolio.html', views.viewPortfolio, name="viewPortfolio"),
 
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='templates/password_reset/password_reset.html'), name='password_reset'),
     path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='templates/password_reset/password_reset_done.html'), name='password_reset_done'),
     path('password-reset-confirm/<uidb64>/<token>', auth_views.PasswordResetConfirmView.as_view(template_name='templates/password_reset/password_reset_confirm.html'), name='password_reset_confirm'),
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='templates/password_reset/password_reset_complete.html'), name='password_reset_complete'),
 
-    path('', views.add_stock, name='dashboard'),
+    path('', views.viewPortfolio, name='dashboard'),
     path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate")
 ]
 
