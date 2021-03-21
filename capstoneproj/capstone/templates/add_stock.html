@@ -5,7 +5,7 @@
 <br/>
 
 
-    <form action="{% url 'viewPortfolio' %}" class="form-inline my-2 my-lg-0" method="POST">
+    <form action="{% url 'add_stock' %}" class="form-inline my-2 my-lg-0" method="POST">
     	{% csrf_token %}
       <input class="form-control mr-sm-2" type="search" placeholder="Add To Portfolio" aria-label="Search" name="ticker">
       <button style="border-color: #1ab188!important; background-color: #1ab188!important;" class="btn btn-success my-2 my-sm-0" type="submit">Add Stock</button>

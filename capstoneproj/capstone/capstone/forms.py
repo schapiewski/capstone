@@ -16,7 +16,7 @@ class UpdateInfoForm(forms.ModelForm):
 
 class StockForm(forms.ModelForm):
 	class Meta:
-		model = Ticker
+		model = Stock
 		fields = ["ticker"]
 
 

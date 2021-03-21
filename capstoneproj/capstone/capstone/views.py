@@ -546,7 +546,7 @@ def sectorPage(request):
     return render(request, 'sector_page.html', context)
 
 @login_required(login_url='login')
-def viewPortfolio(request):
+def add_stock(request):
     current_user = request.user
     if request.user.is_authenticated:
         stockName = []
@@ -648,8 +648,14 @@ def viewPortfolio(request):
             percentageChange_num = round(PosNegChange_num * 100, 2)
             percentageChange.append(percentageChange_num)
             recommendation.append(Ticker_db.recommendation)
+        if request.method == 'POST':
+            form = StockForm(request.POST or None)
 
-
+            if form.is_valid():
+                form.save()
+                messages.success(request, "Stock has been Added!")
+                return redirect('add_stock')
+        else:
             output = []
             stock = users_stocks
             output.append(stock)
@@ -676,7 +682,7 @@ def viewPortfolio(request):
         'macd': round(macd, 2),
         'recommendation': recommendation
     }
-    return render(request, 'viewPortfolio.html', context)
+    return render(request, 'add_stock.html', context)
 
 @login_required(login_url='login')
 def UpdateDatabase(request):
