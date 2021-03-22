@@ -193,3 +193,6 @@ label{
 .recommendation{
     box-shadow: 10px 10px 15px black!important;
 }
+.table td, .table th {
+    vertical-align: middle!important;
+}

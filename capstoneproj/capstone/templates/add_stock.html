@@ -33,6 +33,7 @@
       <th scope="col">52Wk High</th>
       <th scope="col">52Wk Low</th>
       <th scope="col">Recommendation</th>
+      <th scope="col">Delete</th>
   </tr>
   </thead>
   <tbody>
@@ -59,6 +60,7 @@
                 {% else %}
                 <td style="color: red">{{list_item.recommendation}}</td>
                 {% endif %}
+                <td style="text-align: center"><button class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i></button></td>
 
 			</tr>
             {% endfor %}
