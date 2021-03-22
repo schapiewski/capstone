@@ -52,10 +52,11 @@
 				<td>${{ list_item.year_high }}</td>
 				<td>${{ list_item.year_low }}</td>
                 {% if list_item.recommendation == 'Buy (Hold)' %}
-                <td style="color: green">{{list_item.recommendation}}</td>
+                <td style="color: green">{{index}}</td>
                 {% else %}
-                <td style="color: red">{{list_item.recommendation}}</td>
+                <td style="color: red">{{index}}</td>
                 {% endif %}
+
 			</tr>
             {% endfor %}
 
