@@ -199,10 +199,12 @@ def show_stock_graph(request):
                 print('test2')
                 return candlestick_div
 
-            try:
-                summary = stockInfo['longBusinessSummary']
-            except:
-                summary = 'No summary available'
+            #if we want a company summary on stock page
+            # try:
+            #     summary = stockInfo['longBusinessSummary']
+            # except:
+            #     summary = 'No summary available'
+
             context = {
                 'sector': stockModel.sector,
                 'currentPrice': stockModel.current_price,
@@ -220,8 +222,7 @@ def show_stock_graph(request):
                 'priceChange': stockModel.price_change, #does it need abs
                 'candlestick': candlestick(),
                 'macd': df['MACD'][-1],
-                'recommendation': df['Recommendation'][-1],
-                'summary': summary
+                'recommendation': df['Recommendation'][-1]
             }
             return render(request, 'show_graph.html', context)
         except:
@@ -499,98 +500,104 @@ def sectorPage(request):
 @login_required(login_url='login')
 def add_stock(request):
     current_user = request.user
-# try:
-    if request.user.is_authenticated:
-        stockName = []
-        sector = []
-        marketcap = []
-        yearhigh = []
-        yearlow = []
-        closingprice = []
-        currentPrice = []
-        previousClosingPrice = []
-        priceChange = []
-        percentageChange = []
-        recommendation = []
-        package = OwnedPackage.objects.get(user=current_user).packageNum
-        users_stocks = StockJSON.objects.filter(ownedBy=current_user)
-        print(users_stocks)
-        for i in range(0, len(users_stocks)):
-            stock = users_stocks[i]
-            print("stock", stock)
-            # Find database record with tickerModel entered in input field
-            tickerModel_db = StockJSON.objects.get(ticker=stock)
-            print(marketcap)
-            # Run Data Calculations
-            sector.append(tickerModel_db.sector)
-            marketcap.append(tickerModel_db.market_cap)
-            yearhigh.append(tickerModel_db.year_high)
-            yearlow.append(tickerModel_db.year_low)
-            currentPrice.append(tickerModel_db.current_price)
-            previousClosingPrice.append(tickerModel_db.previous_closing_price)
-            priceChange.append(tickerModel_db.price_change)
-            percentageChange.append(tickerModel_db.percentage_change)
+    try:
+        if request.user.is_authenticated:
+            stockName = []
+            sector = []
+            marketcap = []
+            yearhigh = []
+            yearlow = []
+            closingprice = []
+            currentPrice = []
+            previousClosingPrice = []
+            priceChange = []
+            percentageChange = []
+            recommendation = []
+            output=[]
+            package = OwnedPackage.objects.get(user=current_user).packageNum
+            users_stocks = StockJSON.objects.filter(ownedBy=current_user)
+            #print(users_stocks)
+            for i in range(0, len(users_stocks)):
+                stock = users_stocks[i]
+                #print("stock", stock)
 
-            df = pd.read_json(tickerModel_db.info, orient='index')
-            print(df['Recommendation'][-1])
-            recommendation.append(df['Recommendation'][-1])
-            # test = tickerModel_db.info
-            # stockModel = StockJSON.objects.get(ticker = stock)
-            # stockInfo = yf.Ticker(stock).info
-            # print(stockInfo)
-            # print(test['Recommendation'][-1])
-        if request.method == 'POST':
-            form = StockForm(request.POST or None)
-            inputtedStock = request.POST.get("ticker").upper()
-            updateStock = StockJSON.objects.get(ticker=inputtedStock)
-            updateStock.ownedBy.add(request.user)
-            print(updateStock)
-            if form.is_valid():
-                form.save()
-                messages.success(request, "Stock has been Added!")
-                return redirect('add_stock')
+                # Find database record with tickerModel entered in input field
+                tickerModel_db = StockJSON.objects.get(ticker=stock)
+                #print(marketcap)
+
+                # Run Data Calculations
+                sector.append(tickerModel_db.sector)
+                marketcap.append(tickerModel_db.market_cap)
+                yearhigh.append(tickerModel_db.year_high)
+                yearlow.append(tickerModel_db.year_low)
+                currentPrice.append(tickerModel_db.current_price)
+                previousClosingPrice.append(tickerModel_db.previous_closing_price)
+                priceChange.append(tickerModel_db.price_change)
+                percentageChange.append(tickerModel_db.percentage_change)
+
+                df = pd.read_json(tickerModel_db.info, orient='index')
+                #print(df['Recommendation'][-1])
+                recommendation.append(df['Recommendation'][-1])
+                # test = tickerModel_db.info
+                # stockModel = StockJSON.objects.get(ticker = stock)
+                # stockInfo = yf.Ticker(stock).info
+                # print(stockInfo)
+                # print(test['Recommendation'][-1])
+
+            packageLookup = {0: 1, 1: 3, 2: 5}
+            if request.method == 'POST':
+                if len(users_stocks) < packageLookup[package]:
+                    print(len(users_stocks))
+                    print(package)
+                    form = StockForm(request.POST or None)
+                    inputtedStock = request.POST.get("ticker").upper()
+                    updateStock = StockJSON.objects.get(ticker=inputtedStock)
+
+                    if current_user not in updateStock.ownedBy.all():
+                        updateStock.ownedBy.add(request.user)
+                        if form.is_valid():
+                            form.save()
+                            messages.success(request, "Stock has been Added!")
+                            return redirect('add_stock')
+                    else:
+                        messages.error(request, "Stock already in portfolio")
+                        return redirect('add_stock')
+                else:
+                    messages.error(request, "Stock tracking limit reached: upgrade package, or delete a stock")
+                    return redirect('add_stock')
+            else:
+                output = []
+                stock = users_stocks
+                output.append(stock)
         else:
-            output = []
-            stock = users_stocks
-            output.append(stock)
-    else:
-        return redirect('pricing.html')
-    print(marketcap)
-    print(recommendation)
-    print(users_stocks)
-    test = enumerate(users_stocks)
-    test1 = [0, 2 , 4, 6]
-    # print(test[0])
-    mylist = zip(test1, recommendation)
-    for (a, b) in mylist:
-        print(a)
-        print(b)
-    print(mylist)
-    context = {
-        'range': np.arange(len(users_stocks)),
-        'mylist': mylist,
-        'users_stocks': users_stocks,
-        'output': output,
-        'currentPrice': currentPrice,
-        'marketcap': marketcap,
-        'yearhigh': yearhigh,
-        'yearlow': yearlow,
-        'closingprice': closingprice,
-        'stock': stock,
-        'stockName': stockName,
-        'percentageChange': percentageChange,
-        'previousClosingPrice': previousClosingPrice,
-        'priceChange': priceChange,
-        'recommendation': recommendation,
-    }
-    #except:
-    # print("error")
-    # message = "test"
-    # context = {
-    #     'message': message,
-    #     'package': package
-    # }
-    # print(package)
+            return redirect('pricing.html')
+
+        temp = {i: {'stock': users_stocks[i], 'recommendation': recommendation[i]} for i in range(len(users_stocks))}
+
+        context = {
+            'range': np.arange(len(users_stocks)),
+            'users_stocks': temp,
+            'output': output,
+            'currentPrice': currentPrice,
+            'marketcap': marketcap,
+            'yearhigh': yearhigh,
+            'yearlow': yearlow,
+            'closingprice': closingprice,
+            'stock': stock,
+            'stockName': stockName,
+            'percentageChange': percentageChange,
+            'previousClosingPrice': previousClosingPrice,
+            'priceChange': priceChange,
+            'recommendation': recommendation,
+        }
+    except:
+        print("error")
+        message = "test"
+        context = {
+            'message': message,
+            'package': package
+        }
+    print(package)
     return render(request, 'add_stock.html', context)
 
 
