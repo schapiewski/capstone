@@ -89,30 +89,108 @@
       </div>
       <div class="container px-3 my-3">
         <div class="table-responsive">
-        <table class="table table-striped">
-          <thead class="thead-light">
-          <tr>
-            <th scope="col">Current Price</th>
-            <th scope="col">Previous Closing</th>
-            <th scope="col">Yearly High</th>
-            <th scope="col">Year Low</th>
-            <th scope="col">Market Cap</th>
-            <th scope="col">MACD Value</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr>
-            <td>${{currentPrice}}</td>
-            <td>${{previousClosingPrice}}</td>
-            <td>${{yearhigh}}</td>
-            <td>${{yearlow}}</td>
-            <td>${{marketcap}}</td>
-            <td>{{macd}}</td>
-          </tr>
-          </tbody>
-        </table>
-          </div>
+          <table class="table table-striped">
+            <thead class="thead-light">
+            <tr>
+              <th scope="col">Current Price</th>
+              <th scope="col">Previous Closing</th>
+              <th scope="col">Yearly High</th>
+              <th scope="col">Year Low</th>
+              <th scope="col">Market Cap</th>
+              <th scope="col">MACD Value</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td>${{currentPrice}}</td>
+              <td>${{previousClosingPrice}}</td>
+              <td>${{yearhigh}}</td>
+              <td>${{yearlow}}</td>
+              <td>${{marketcap}}</td>
+              <td>{{macd}}</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <br><br>Historic Monthly
+
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead class="thead-light">
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Total Sales</th>
+              <th scope="col">Total Percent Change</th>
+            </tr>
+            </thead>
+            {% for item in historic_monthly.values %}
+            <tbody>
+            <tr>
+              <td>{{item.Month}}/{{item.Year}}</td>
+              <td>{{item.Total_Sales}}</td>
+              <td>{{item.Percent_Change}}%</td>
+            </tr>
+            </tbody>
+            {% endfor %}
+          </table>
+        </div>
+
+        <br><br>Historic Yearly
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead class="thead-light">
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Total Percent Change</th>
+            </tr>
+            </thead>
+            {% for key, item in historic_yearly.items %}
+            <tbody>
+            <tr>
+
+              <td>{{key.year}}</td>
+              <td>{{item.Percent_Change}}%</td>
+            </tr>
+            </tbody>
+            {% endfor %}
+          </table>
+        </div>
+
+        <br><br>Historic Sales
+        <div class="table-responsive">
+          <table class="table table-striped">
+            <thead class="thead-light">
+            <tr>
+              <th scope="col">Buy Date</th>
+              <th scope="col">Bought Price</th>
+              <th scope="col">Sell Date</th>
+              <th scope="col">Sale Price</th>
+              <th scope="col">Percent Change</th>
+<!--              running sum of percent change for the month-->
+<!--              <th scope="col">Monthly Percent Change</th>-->
+            </tr>
+            </thead>
+            {% for item in historic_sales.values %}
+            <tbody>
+            <tr>
+              <td>{{item.Buy_Date}}</td>
+              <td>{{item.Buy_Price}}</td>
+              <td>{{item.Sell_Date}}</td>
+              <td>{{item.Sell_Price}}</td>
+              <td>{{item.Percent_Change}}%</td>
+<!--              <td>{{item.Monthly_Percent_Change}}%</td>-->
+            </tr>
+            </tbody>
+            {% endfor %}
+          </table>
+        </div>
+
+
+
+
       </div>
+
       <br>
       <br>
     </div>

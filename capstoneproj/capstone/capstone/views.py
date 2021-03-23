@@ -179,7 +179,7 @@ def show_stock_graph(request):
             # print(stockInfo)
 
             df = pd.read_json(stockModel.info, orient='index')
-            # print(df)
+            print(df)
 
             # Create Candlestick graph from newly created dataframe
             def candlestick():
@@ -200,11 +200,16 @@ def show_stock_graph(request):
                 return candlestick_div
 
             #if we want a company summary on stock page
-            # try:
-            #     summary = stockInfo['longBusinessSummary']
-            # except:
-            #     summary = 'No summary available'
+            try:
+                summary = stockInfo['longBusinessSummary']
+            except:
+                summary = 'No summary available'
+            historic_monthly = json.loads(stockModel.historic_monthly)
+            historic_yearly = pd.read_json(stockModel.historic_yearly, orient='index')
+            historic_yearly = historic_yearly.to_dict(orient='index')
+            historic_sales = json.loads(stockModel.historic_sales)
 
+            print(historic_yearly)
             context = {
                 'sector': stockModel.sector,
                 'currentPrice': stockModel.current_price,
@@ -219,13 +224,17 @@ def show_stock_graph(request):
                 'stockName': stockModel.stock_name,
                 'percentageChange': stockModel.percentage_change,
                 'previousClosingPrice': stockModel.previous_closing_price,
-                'priceChange': stockModel.price_change, #does it need abs
+                'priceChange': stockModel.price_change,
                 'candlestick': candlestick(),
                 'macd': df['MACD'][-1],
-                'recommendation': df['Recommendation'][-1]
+                'recommendation': df['Recommendation'][-1],
+                'historic_monthly': historic_monthly,
+                'historic_yearly': historic_yearly,
+                'historic_sales': historic_sales
             }
             return render(request, 'show_graph.html', context)
-        except:
+        except Exception as e:
+            print(e)
             context = {
                 'incorrectString': True,
             }
@@ -547,8 +556,6 @@ def add_stock(request):
             packageLookup = {0: 1, 1: 3, 2: 5}
             if request.method == 'POST':
                 if len(users_stocks) < packageLookup[package]:
-                    print(len(users_stocks))
-                    print(package)
                     form = StockForm(request.POST or None)
                     inputtedStock = request.POST.get("ticker").upper()
                     updateStock = StockJSON.objects.get(ticker=inputtedStock)
@@ -613,85 +620,118 @@ def UpdateDatabase(request):
     #takes in dataframe of stock data, and number of months for historic data
     #returns all sells and dates, also returns an average percent change for the each month
     def historic_return_monthly(data, n):
-        date = datetime.datetime.now()
+        current_date = datetime.datetime.now()
+
+        # Builds month list
         months = []
-        for i in range(n + 1):
-            # keeps i 0-11
-            i = i - (12 * (i // 12)) if i >= 12 else i
+        tempYear = current_date.year
+        for i in range(n, -1, -1):
+            # keeps i 0-12
+            i = i - (12 * (i // 12)) if i > 12 else i
 
-            temp = date.month - i
+            temp = current_date.month - i
             if temp > 0:
-                months.append(temp)
+                months.append([tempYear, temp])
             elif temp == 0:
-                months.append(12)
+                months.append([tempYear - 1, 12])
             elif temp < 0:
-                months.append(temp + 12)
+                months.append([tempYear - 1, temp + 12])
 
-        initial = 0  # initial value, might not be needed
-        change = []  # between buy and sell
         previous = None  # value for the day before
         initial_flag = True  # for first if to run only on first loop
         sold = True  # if it was just sold
-        current = 0  # current closing value with hold period
-        for i in data.index:
-            if i.month in months and (i.year == date.year or i.year == date.year - 1):
-                if initial_flag and data.loc[i]['Recommendation'] == 'Buy (Hold)':
+        buyPrice = 0  # current closing value with hold period
+        df = pd.DataFrame(columns=['Buy_Date', 'Buy_Price', 'Sell_Date', 'Sell_Price', 'Percent_Change'])
+        rowDict = {'Buy_Date': 0, 'Buy_Price': 0, 'Sell_Date': 0, 'Sell_Price': 0, 'Percent_Change': 0}
 
-                    initial = data.loc[i]['Close']
-                    current = data.loc[i]['Close']
-                    previous = i
+        for i, day in enumerate(data.index):
+
+            if [day.year, day.month] in months:
+                #converting string dates into ints
+                day_str = '0' + str(day.day) if day.day < 10 else str(day.day)
+                month_str = '0' + str(day.month) if day.month < 10 else str(day.month)
+                year_str = str(day.year)
+
+                # first buy
+                if initial_flag and data.loc[day]['Recommendation'] == 'Buy (Hold)':
+                    buyPrice = data.loc[day]['Close']
+                    rowDict['Buy_Date'] = month_str + '/' + day_str + '/' + year_str
+                    rowDict['Buy_Price'] = round(buyPrice, 2)
+                    previous = day
                     initial_flag = False
                     sold = False
-                elif sold and data.loc[i]['Recommendation'] == 'Buy (Hold)' and \
+
+                # if there was a buy just after a sell
+                elif sold and data.loc[day]['Recommendation'] == 'Buy (Hold)' and \
                         data.loc[previous]['Recommendation'] == 'Sell':
-
-                    current = data.loc[i]['Close']
+                    buyPrice = data.loc[day]['Close']
+                    rowDict['Buy_Date'] = month_str + '/' + day_str + '/' + year_str
+                    rowDict['Buy_Price'] = round(buyPrice, 2)
                     sold = False
-                    previous = i
-                elif not sold and data.loc[i]['Recommendation'] == 'Sell' and \
+                    previous = day
+
+                # if there was sell just after a buy
+                elif not sold and data.loc[day]['Recommendation'] == 'Sell' and \
                         data.loc[previous]['Recommendation'] == 'Buy (Hold)':
-
-                    temp = data.loc[i]['Close']
-                    change.append((i, (temp - current) / current))
+                    sellPrice = data.loc[day]['Close']
+                    rowDict['Sell_Date'] = month_str + '/' + day_str + '/' + year_str
+                    rowDict['Sell_Price'] = round(sellPrice, 2)
+                    rowDict['Percent_Change'] = round(((sellPrice - buyPrice) / buyPrice) * 100, 2)
+                    df = df.append(rowDict, ignore_index=True)
+                    rowDict = {'Buy_Date': 0, 'Buy_Price': 0, 'Sell_Date': 0, 'Sell_Price': 0, 'Percent_Change': 0}
                     sold = True
-                    previous = i
+                    previous = day
 
-        change.append((i, (temp - current) / current))
-        dateChangeDF = pd.DataFrame(change, columns=['Sell Date', 'Change']) # not percentages
-        dateChangeDF = dateChangeDF.set_index(dateChangeDF['Sell Date'])
-        dateChangeDF.drop(['Sell Date'], axis=1, inplace=True)
+        df.insert(len(df.columns), 'Monthly_Percent_Change', 0.0)
 
-        monthAverage = []
-        sum, count = 0, 0
-        currentDate = dateChangeDF.index[0]
-        for index, value in dateChangeDF.iterrows():
-            if index.month == currentDate.month:
-                sum += value[0]
+        # appends the progressive total monthly percent change, resetting at the first sell of each month.
+        monthSum = []
+        totalChange = 0
+        count = 0
+        monthCheck = int(df['Sell_Date'][0].split('/')[0])
+        yearCheck = int(df['Sell_Date'][0].split('/')[2])
+
+        for i, value in df.iterrows():
+            tempYear = int(value['Sell_Date'].split('/')[2])
+            tempMonth = int(value['Sell_Date'].split('/')[0])
+            if tempMonth == monthCheck and tempYear == yearCheck:
+                totalChange += value['Percent_Change']
                 count += 1
+                df.loc[i, 'Monthly_Percent_Change'] = round(totalChange, 2)
             else:
-                monthAverage.append((currentDate, (sum / count) * 100))
-                currentDate = index
-                sum = value[0]
+                monthSum.append([yearCheck, monthCheck, count, round(totalChange, 2)])
+                totalChange = value['Percent_Change']
                 count = 1
+                df.loc[i, 'Monthly_Percent_Change'] = round(totalChange, 2)
+                monthCheck = int(value['Sell_Date'].split('/')[0])
+                yearCheck = int(value['Sell_Date'].split('/')[2])
+        monthSum.append([yearCheck, monthCheck, count, round(totalChange, 2)])
 
-        monthAverage.append((currentDate, (sum / count) * 100))
-        monthChangeDF = pd.DataFrame(monthAverage, columns=['Month', 'Percent Change'])
-        monthChangeDF = monthChangeDF.set_index(monthChangeDF['Month'])
-        monthChangeDF.drop(['Month'], axis=1, inplace=True)
+        monthSumDF = pd.DataFrame(monthSum, columns=['Year', 'Month', 'Total_Sales', 'Percent_Change'])
+        monthLookUp = {1: 'January', 2: 'February', 3:'March', 4:'April', 5:'May', 6:'June', 7:'July',
+                       8:'August', 9:'September', 10:'October', 11:'November', 12:'December'}
+        # prevMonth = monthSumDF['Month'][0]
+        # first = True
+        # monthSumDF2 = pd.DataFrame(columns=['Year', 'Month', 'Total_Sales', 'Percent_Change'])
+        # for i, value in monthSumDF.iterrows():
+        #     if first:
+        #         first = False
+        #         monthSumDF2 = monthSumDF2.append([value['Year'], monthLookUp[value['Month']],
+        #                                           value['Total_Sales'], value['Percent_Change']])
+        #         continue
+        #     if prevMonth == value['Month'] - 1:
+        #         monthSumDF2 = monthSumDF2.append([value['Year'], monthLookUp[value['Month']],
+        #                                           value['Total_Sales'], value['Percent_Change']])
+        #         prevMonth = value['Month']
+        #         #df.loc[i, 'Month'] = monthLookUp[value['Month']]
+        #     else:
+        #         monthSumDF2 = monthSumDF2.append([value['Year'], monthLookUp[prevMonth],
+        #                                           value['Total_Sales'], value['Percent_Change']])
+        #         prevMonth = prevMonth + 1
 
-        #removing unneeded months
-        for i in monthChangeDF.index:
-            if i.month == date.month:
-                break
-            else:
-                monthChangeDF.drop([i], inplace=True)
-
-        ###########################################
-        # right now months arent unique
-        ###############################################
-
-        #return (date, change) and (month, change)
-        return dateChangeDF, monthChangeDF
+        # df =  buy date, buy price, sell date, sell price, percent change for each sell
+        # monthSumDF = dataframe of (year, month, total sales total month change)
+        return df, monthSumDF
 
     #expects dataframe of stock info, goes back as many years as possible
     #returns array of (date, year average)
@@ -717,18 +757,10 @@ def UpdateDatabase(request):
 
         for i in data.index:
             if i.year != current_year.year:
-                #fixes divide by zero
-                if len(change) == 0:
-                    tempChange = 0
-                else:
-                    tempChange = sum(change) / len(change)
-
-
-                year_change.append([current_year, tempChange * 100])
+                year_change.append([current_year, round(sum(change) * 100, 2)])
                 current_year = i
                 change = []
             if initial_flag and data.loc[i]['Recommendation'] == 'Buy (Hold)':
-                initial = data.loc[i]['Close']
                 current = data.loc[i]['Close']
                 previous = i
                 initial_flag = False
@@ -746,7 +778,7 @@ def UpdateDatabase(request):
                 previous = i
         #uncomment if 2021 is needed
         # year_change.append([current_year, (sum(change) / len(change))])
-        year_changeDF = pd.DataFrame(year_change, columns=['Year', 'Percent Change'])
+        year_changeDF = pd.DataFrame(year_change, columns=['Year', 'Percent_Change'])
         year_changeDF = year_changeDF.set_index(year_changeDF['Year'])
         year_changeDF.drop(['Year'], axis=1, inplace=True)
         return year_changeDF
@@ -880,10 +912,12 @@ def UpdateDatabase(request):
                 test.price_change = priceChange
 
                 monthly = monthlyChange.to_json(orient="index")
+                sales = dateChange.to_json(orient="index")
                 yearly = yearChange.to_json(orient="index")
                 result = stockData.to_json(orient="index")
 
                 test.historic_monthly = monthly
+                test.historic_sales = sales
                 test.historic_yearly = yearly
                 test.info = result
 
@@ -895,13 +929,14 @@ def UpdateDatabase(request):
                 #print("Creating ", stockName, "...")
                 result = stockData.to_json(orient="index")
                 monthly = monthlyChange.to_json(orient="index")
+                sales = dateChange.to_json(orient="index")
                 yearly = yearChange.to_json(orient="index")
 
                 test = StockJSON(ticker=ticker, stock_name=stockName, sector=sector, market_cap=marketcap,
                                  current_price=currentPrice, previous_closing_price=previousClosingPrice,
                                  percentage_change=percentageChange, year_high=yearhigh, year_low=yearlow,
                                  price_change=priceChange, info=result, historic_monthly=monthly,
-                                 historic_yearly=yearly)
+                                 historic_yearly=yearly, historic_sales=sales)
                 #print("Saving ", test.stock_name, " to the Database...")
                 test.save()
             bar()

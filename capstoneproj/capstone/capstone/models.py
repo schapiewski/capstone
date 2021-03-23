@@ -28,6 +28,7 @@ class StockJSON(models.Model):
     previous_closing_price = models.DecimalField(decimal_places=2, max_digits=10000)
 
     historic_monthly = models.JSONField(default = dict())
+    historic_sales = models.JSONField(default = dict())
     historic_yearly = models.JSONField(default = dict())
 
     def __str__(self):
