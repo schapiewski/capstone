@@ -196,3 +196,7 @@ label{
 .table td, .table th {
     vertical-align: middle!important;
 }
+
+.nav-tabs > .nav-item > .nav-link:hover {
+    color: #1ab188!important;
+}
