@@ -149,7 +149,7 @@
                                     <!--              <th scope="col">Monthly Percent Change</th>-->
                                 </tr>
                                 </thead>
-                                {% for item in historic_sales.values %}
+                                {% for item in historic_sales.values reversed %}
                                 <tbody>
                                 <tr>
                                     <td>{{item.Buy_Date}}</td>
@@ -177,7 +177,7 @@
                                     <th scope="col">Total Percent Change</th>
                                 </tr>
                                 </thead>
-                                {% for key, item in historic_yearly.items %}
+                                {% for key, item in historic_yearly.items reversed %}
                                 <tbody>
                                 <tr>
 
@@ -203,33 +203,33 @@
                                     <th scope="col">Total Percent Change</th>
                                 </tr>
                                 </thead>
-                                {% for item in historic_monthly.values %}
+                                {% for item in historic_monthly.values reversed %}
                                 <tbody>
                                 <tr>
                                     {% if item.Month == 1 %}
-                                    <td>January</td>
+                                    <td>January {{item.Year}}</td>
                                     {% elif item.Month == 2 %}
-                                    <td>February</td>
+                                    <td>February {{item.Year}}</td>
                                     {% elif item.Month == 3 %}
-                                    <td>March</td>
+                                    <td>March {{item.Year}}</td>
                                     {% elif item.Month == 4 %}
-                                    <td>April</td>
+                                    <td>April {{item.Year}}</td>
                                     {% elif item.Month == 5 %}
-                                    <td>May</td>
+                                    <td>May {{item.Year}}</td>
                                     {% elif item.Month == 6 %}
-                                    <td>June</td>
+                                    <td>June {{item.Year}}</td>
                                     {% elif item.Month == 7 %}
-                                    <td>July</td>
+                                    <td>July {{item.Year}}</td>
                                     {% elif item.Month == 8 %}
-                                    <td>August</td>
+                                    <td>August {{item.Year}}</td>
                                     {% elif item.Month == 9 %}
-                                    <td>September</td>
+                                    <td>September {{item.Year}}</td>
                                     {% elif item.Month == 10 %}
-                                    <td>October</td>
+                                    <td>October {{item.Year}}</td>
                                     {% elif item.Month == 11 %}
-                                    <td>November</td>
+                                    <td>November {{item.Year}}</td>
                                     {% else %}
-                                    <td>December</td>
+                                    <td>December {{item.Year}}</td>
                                     {% endif %}
 <!--                                    <td>{{item.Month}}/{{item.Year}}</td>-->
                                     <td>{{item.Total_Sales}}</td>

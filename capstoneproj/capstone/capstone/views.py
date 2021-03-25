@@ -244,6 +244,7 @@ def show_stock_graph(request):
                 months.append(month)
                 colors.append(color)
                 percentchg.append(item['Percent_Change'])
+
             # Create Candlestick graph from newly created dataframe
             def bar():
                 figure = go.Figure(
