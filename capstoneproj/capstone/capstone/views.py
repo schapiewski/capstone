@@ -40,7 +40,7 @@ import yfinance as yf
 import random
 import json
 from alive_progress import alive_bar
-# pd.options.display.max_rows = 9999
+pd.options.display.max_rows = 9999
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -628,7 +628,6 @@ def UpdateDatabase(request):
         for i in range(n, -1, -1):
             # keeps i 0-12
             i = i - (12 * (i // 12)) if i > 12 else i
-
             temp = current_date.month - i
             if temp > 0:
                 months.append([tempYear, temp])
@@ -643,9 +642,7 @@ def UpdateDatabase(request):
         buyPrice = 0  # current closing value with hold period
         df = pd.DataFrame(columns=['Buy_Date', 'Buy_Price', 'Sell_Date', 'Sell_Price', 'Percent_Change'])
         rowDict = {'Buy_Date': 0, 'Buy_Price': 0, 'Sell_Date': 0, 'Sell_Price': 0, 'Percent_Change': 0}
-
         for i, day in enumerate(data.index):
-
             if [day.year, day.month] in months:
                 #converting string dates into ints
                 day_str = '0' + str(day.day) if day.day < 10 else str(day.day)
@@ -681,7 +678,6 @@ def UpdateDatabase(request):
                     rowDict = {'Buy_Date': 0, 'Buy_Price': 0, 'Sell_Date': 0, 'Sell_Price': 0, 'Percent_Change': 0}
                     sold = True
                     previous = day
-
         df.insert(len(df.columns), 'Monthly_Percent_Change', 0.0)
 
         # appends the progressive total monthly percent change, resetting at the first sell of each month.
@@ -690,7 +686,6 @@ def UpdateDatabase(request):
         count = 0
         monthCheck = int(df['Sell_Date'][0].split('/')[0])
         yearCheck = int(df['Sell_Date'][0].split('/')[2])
-
         for i, value in df.iterrows():
             tempYear = int(value['Sell_Date'].split('/')[2])
             tempMonth = int(value['Sell_Date'].split('/')[0])
@@ -706,32 +701,26 @@ def UpdateDatabase(request):
                 monthCheck = int(value['Sell_Date'].split('/')[0])
                 yearCheck = int(value['Sell_Date'].split('/')[2])
         monthSum.append([yearCheck, monthCheck, count, round(totalChange, 2)])
-
         monthSumDF = pd.DataFrame(monthSum, columns=['Year', 'Month', 'Total_Sales', 'Percent_Change'])
-        monthLookUp = {1: 'January', 2: 'February', 3:'March', 4:'April', 5:'May', 6:'June', 7:'July',
-                       8:'August', 9:'September', 10:'October', 11:'November', 12:'December'}
-        # prevMonth = monthSumDF['Month'][0]
-        # first = True
-        # monthSumDF2 = pd.DataFrame(columns=['Year', 'Month', 'Total_Sales', 'Percent_Change'])
-        # for i, value in monthSumDF.iterrows():
-        #     if first:
-        #         first = False
-        #         monthSumDF2 = monthSumDF2.append([value['Year'], monthLookUp[value['Month']],
-        #                                           value['Total_Sales'], value['Percent_Change']])
-        #         continue
-        #     if prevMonth == value['Month'] - 1:
-        #         monthSumDF2 = monthSumDF2.append([value['Year'], monthLookUp[value['Month']],
-        #                                           value['Total_Sales'], value['Percent_Change']])
-        #         prevMonth = value['Month']
-        #         #df.loc[i, 'Month'] = monthLookUp[value['Month']]
-        #     else:
-        #         monthSumDF2 = monthSumDF2.append([value['Year'], monthLookUp[prevMonth],
-        #                                           value['Total_Sales'], value['Percent_Change']])
-        #         prevMonth = prevMonth + 1
+
+        #fills in months that have 0 sales
+        monthSumDF2 = []
+        tempI = 0
+        for i, value in enumerate(months):
+            if [monthSumDF.loc[tempI, 'Year'], monthSumDF.loc[tempI, 'Month']] != value:
+                monthSumDF2.append([value[0], value[1], 0, 0])
+            elif [monthSumDF.loc[tempI, 'Year'], monthSumDF.loc[tempI, 'Month']] == value:
+                monthSumDF2.append([monthSumDF.loc[tempI, 'Year'], monthSumDF.loc[tempI, 'Month'],
+                                    monthSumDF.loc[tempI, 'Total_Sales'], monthSumDF.loc[tempI, 'Percent_Change']])
+                if len(monthSumDF) - 1 != tempI:
+                    tempI += 1
+
+        #monthSumDF2 = beforeList + monthSumDF2 + afterList
+        monthSumDFAllMonths = pd.DataFrame(monthSumDF2, columns=['Year', 'Month', 'Total_Sales', 'Percent_Change'])
 
         # df =  buy date, buy price, sell date, sell price, percent change for each sell
         # monthSumDF = dataframe of (year, month, total sales total month change)
-        return df, monthSumDF
+        return df, monthSumDFAllMonths
 
     #expects dataframe of stock info, goes back as many years as possible
     #returns array of (date, year average)
@@ -744,7 +733,6 @@ def UpdateDatabase(request):
             if i.year < date.year and i.year not in years:
                 years.append(i.year)
                 dates.append(i)
-
 
         initial = 0  # initial value, might not be needed
         change = []  # between buy and sell for year
@@ -807,13 +795,11 @@ def UpdateDatabase(request):
     # --------------------------------------------------------------------------------------------------------------#
     # --------------------------------------------------------------------------------------------------------------#
 
-    #df = pd.read_json(result, orient='index') for reading in from database
     df = pd.read_csv('capstone/sp500.csv')
-    #test_symbols = ['AMZN']
-    # for ticker in test_symbols:
+
     with alive_bar(len(df)) as bar:
-        count = 0
         for index, ticker in df.iterrows():
+            #print(ticker)
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)
@@ -862,10 +848,9 @@ def UpdateDatabase(request):
                     stockData.loc[i, 'Recommendation'] = 'Sell'
 
             #dataframes: dateChange = sell day, change for all 12 months
-            #monthlyChange = just month, average percent change for month
+            #monthlyChange = just month, total sells, average percent change for month
             dateChange, monthlyChange = historic_return_monthly(stockData, 12)
 
-            #print(monthlyChange)
             #dataframe: (year, percent change)
             yearChange = historic_return_yearly(stockData)
 
@@ -922,7 +907,7 @@ def UpdateDatabase(request):
                 test.info = result
 
                 test.save()
-               # print('Updated: ', stockName)
+                #print('Updated: ', stockName)
 
             # If stock is NOT created in database, Create that database record
             except:
