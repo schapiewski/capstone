@@ -25,6 +25,7 @@ import pandas as pd
 from alpha_vantage.timeseries import TimeSeries
 import plotly.graph_objects as go
 from plotly.offline import plot
+import plotly.express as px
 import requests
 from alpha_vantage.techindicators import TechIndicators
 import datetime
@@ -171,19 +172,16 @@ def show_stock_graph(request):
     if request.method == 'POST':
         # If stock tickerModel entered is found in database
         try:
+            print("test")
             # Make tickerModel entered to uppercase before running database check
             stock = request.POST['stock'].upper()
-
-            stockModel = StockJSON.objects.get(ticker = stock)
+            print("test - ")
+            stockModel = StockJSON.objects.get(ticker=stock)
             stockInfo = yf.Ticker(stock).info
             # print(stockInfo)
-
+            print("test2")
             df = pd.read_json(stockModel.info, orient='index')
-            print(df)
-
-            # Create Candlestick graph from newly created dataframe
             def candlestick():
-                print('test3')
                 figure = go.Figure(
                     data=[
                         go.Candlestick(
@@ -195,10 +193,12 @@ def show_stock_graph(request):
                         )
                     ]
                 )
+                figure.update_yaxes(title_text="Price ($)")
+                figure.update_xaxes(title_text="Year")
                 candlestick_div = plot(figure, output_type='div')
-                print('test2')
                 return candlestick_div
 
+            print("test 3")
             #if we want a company summary on stock page
             try:
                 summary = stockInfo['longBusinessSummary']
@@ -208,9 +208,64 @@ def show_stock_graph(request):
             historic_yearly = pd.read_json(stockModel.historic_yearly, orient='index')
             historic_yearly = historic_yearly.to_dict(orient='index')
             historic_sales = json.loads(stockModel.historic_sales)
+            months = []
+            percentchg = []
+            colors = []
+            for item in historic_monthly.values():
+                print(item['Month'], " ", item['Percent_Change'])
+                if item['Month'] == 1:
+                    month = "Jan"
+                elif item['Month'] == 2:
+                    month = "Feb"
+                elif item['Month'] == 3:
+                    month = "Mar"
+                elif item['Month'] == 4:
+                    month = "Apr"
+                elif item['Month'] == 5:
+                    month = "May"
+                elif item['Month'] == 6:
+                    month = "Jun"
+                elif item['Month'] == 7:
+                    month = "Jul"
+                elif item['Month'] == 8:
+                    month = "Aug"
+                elif item['Month'] == 9:
+                    month = "Sep"
+                elif item['Month'] == 10:
+                    month = "Oct"
+                elif item['Month'] == 11:
+                    month = "Nov"
+                elif item['Month'] == 12:
+                    month = "Dec"
+                if item['Percent_Change'] >= 0:
+                    color = "#1ab188"
+                elif item['Percent_Change'] < 0:
+                    color = "#b92e34"
+                months.append(month)
+                colors.append(color)
+                percentchg.append(item['Percent_Change'])
 
-            print(historic_yearly)
+            # Create Candlestick graph from newly created dataframe
+            def bar():
+                figure = go.Figure(
+                    [
+                        go.Bar(
+                            x=months,
+                            y=percentchg,
+                            text=percentchg,
+                            textposition='auto',
+                            marker={'color': colors},
+                        )
+                    ]
+                )
+                figure.update_layout(title_text='Historic Return Following Our Recommendation System for The Past 12 Months')
+                figure.update_yaxes(title_text="Percent Change (%)")
+                figure.update_xaxes(title_text="Month")
+                bar_div = plot(figure, output_type='div')
+                return bar_div
+            data = json.loads(stockModel.historic_monthly)
             context = {
+                'monthlyBarChart': bar(),
                 'sector': stockModel.sector,
                 'currentPrice': stockModel.current_price,
                 'marketcap': stockModel.market_cap,
