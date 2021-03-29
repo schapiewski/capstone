@@ -60,7 +60,10 @@
                 {% else %}
                 <td style="color: red">{{list_item.recommendation}}</td>
                 {% endif %}
-                <td style="text-align: center"><button class="btn btn-danger"><i class="fa fa-trash" aria-hidden="true"></i></button></td>
+                <form action="{% url 'delete_stock' %}" method="get">
+                    <td style="text-align: center"><button class="btn btn-danger" name="deleteButton" value="{{list_item.stock.ticker}}"><i class="fa fa-trash" aria-hidden="true"></i></button></td>
+                </form>
+
 
 			</tr>
             {% endfor %}

@@ -614,7 +614,6 @@ def add_stock(request):
                     form = StockForm(request.POST or None)
                     inputtedStock = request.POST.get("ticker").upper()
                     updateStock = StockJSON.objects.get(ticker=inputtedStock)
-
                     if current_user not in updateStock.ownedBy.all():
                         updateStock.ownedBy.add(request.user)
                         if form.is_valid():
@@ -661,7 +660,11 @@ def add_stock(request):
         }
     print(package)
     return render(request, 'add_stock.html', context)
-
+def delete_stock(request):
+    stockObj = request.GET.get("deleteButton")
+    deleter = StockJSON.objects.get(ticker=stockObj)
+    deleter.ownedBy.remove(request.user)
+    return redirect('../')
 
 def UpdateDatabase(request):
     def human_format(num):
