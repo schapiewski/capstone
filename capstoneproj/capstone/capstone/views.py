@@ -300,19 +300,31 @@ def show_stock_graph(request):
 
 def pricing(request):
     context = {}
+    current_user = request.user
+    users_stocks_count = len(StockJSON.objects.filter(ownedBy=current_user))
     if request.method == 'POST':
         userPackage = OwnedPackage.objects.get(user=request.user)
         if 'starter_submit' in request.POST:
-            if userPackage.packageNum != 0:
+            if userPackage.packageNum != 0 and users_stocks_count <= 1:
                 userPackage.packageNum = 0
                 messages.success(request, 'Successfully added Starter Package to account')
                 userPackage.save()
                 return redirect('../')
+            else:
+                count = users_stocks_count - 1
+                str(count)
+                messages.error(request, 'Please remove %s stock(s) from your portfolio to downgrade to this package' % count)
+                return redirect('../')
         elif 'deluxe_submit' in request.POST:
-            if userPackage.packageNum != 1:
+            if userPackage.packageNum != 1 and users_stocks_count <= 3:
                 userPackage.packageNum = 1
                 messages.success(request, 'Successfully added Deluxe Package to account')
                 userPackage.save()
+                return redirect('../')
+            else:
+                count = users_stocks_count - 3
+                str(count)
+                messages.error(request, 'Please remove %s stock(s) from your portfolio to downgrade to this package' % count)
                 return redirect('../')
         elif 'ultimate_submit' in request.POST:
             if userPackage.packageNum != 2:
