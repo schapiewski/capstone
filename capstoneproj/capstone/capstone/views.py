@@ -712,12 +712,26 @@ def UpdateDatabase(request):
         buyPrice = 0  # current closing value with hold period
         df = pd.DataFrame(columns=['Buy_Date', 'Buy_Price', 'Sell_Date', 'Sell_Price', 'Percent_Change'])
         rowDict = {'Buy_Date': 0, 'Buy_Price': 0, 'Sell_Date': 0, 'Sell_Price': 0, 'Percent_Change': 0}
+
+        hold_change = []
+        initial_month = True
+        current_month = months[0][1]
+        prev_month = months[0][1]
         for i, day in enumerate(data.index):
             if [day.year, day.month] in months:
                 #converting string dates into ints
                 day_str = '0' + str(day.day) if day.day < 10 else str(day.day)
                 month_str = '0' + str(day.month) if day.month < 10 else str(day.month)
                 year_str = str(day.year)
+
+                if initial_month:
+                    current_month = day
+                    prev_month = day
+                    initial_month = False
+                if day.month != current_month.month:
+                    hold_change.append([current_month.month, (data.loc[prev_month]['Close'] - data.loc[current_month]['Close'])/data.loc[current_month]['Close']])
+                    current_month = day
+                prev_month = day
 
                 # first buy
                 if initial_flag and data.loc[day]['Recommendation'] == 'Buy (Hold)':
@@ -748,6 +762,10 @@ def UpdateDatabase(request):
                     rowDict = {'Buy_Date': 0, 'Buy_Price': 0, 'Sell_Date': 0, 'Sell_Price': 0, 'Percent_Change': 0}
                     sold = True
                     previous = day
+
+        #adds last month in
+        hold_change.append([current_month.month, (data.loc[prev_month]['Close'] - data.loc[current_month]['Close']) /
+                            data.loc[current_month]['Close']])
         df.insert(len(df.columns), 'Monthly_Percent_Change', 0.0)
 
         # appends the progressive total monthly percent change, resetting at the first sell of each month.
@@ -786,7 +804,9 @@ def UpdateDatabase(request):
                     tempI += 1
 
         #monthSumDF2 = beforeList + monthSumDF2 + afterList
+        hold_change = np.array(hold_change)
         monthSumDFAllMonths = pd.DataFrame(monthSumDF2, columns=['Year', 'Month', 'Total_Sales', 'Percent_Change'])
+        monthSumDFAllMonths.insert(len(monthSumDFAllMonths.columns), 'Buy_Hold_Change', hold_change[:, 1:])
 
         # df =  buy date, buy price, sell date, sell price, percent change for each sell
         # monthSumDF = dataframe of (year, month, total sales total month change)
@@ -813,11 +833,20 @@ def UpdateDatabase(request):
         current_year = data.index[0]  # current year being calculated
         year_change = [] #average percent change for year
 
+        year_hold_change = []
+        end_date = data.index[0]
+
         for i in data.index:
             if i.year != current_year.year:
                 year_change.append([current_year, round(sum(change) * 100, 2)])
+
+                #current year is first day of the year, end_date is last day of the year
+                year_hold_change.append([current_year, (data.loc[end_date]['Close'] - data.loc[current_year]['Close']) /
+                                    data.loc[current_year]['Close']])
                 current_year = i
                 change = []
+            end_date = i
+
             if initial_flag and data.loc[i]['Recommendation'] == 'Buy (Hold)':
                 current = data.loc[i]['Close']
                 previous = i
@@ -834,11 +863,14 @@ def UpdateDatabase(request):
                 change.append((temp - current) / current)
                 sold = True
                 previous = i
+
         #uncomment if 2021 is needed
         # year_change.append([current_year, (sum(change) / len(change))])
+        year_hold_change = np.array(year_hold_change)
         year_changeDF = pd.DataFrame(year_change, columns=['Year', 'Percent_Change'])
         year_changeDF = year_changeDF.set_index(year_changeDF['Year'])
         year_changeDF.drop(['Year'], axis=1, inplace=True)
+        year_changeDF.insert(len(year_changeDF.columns), 'Buy_Hold_Change', year_hold_change[:, 1:])
         return year_changeDF
 
     #calculate ema from closing price values
