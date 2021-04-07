@@ -41,7 +41,8 @@ urlpatterns = [
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='templates/password_reset/password_reset_complete.html'), name='password_reset_complete'),
 
     path('', views.add_stock, name='dashboard'),
-    path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate")
+    path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate"),
+    path('testing/', views.testing, name='testing'),
 ]
 
 urlpatterns += staticfiles_urlpatterns()

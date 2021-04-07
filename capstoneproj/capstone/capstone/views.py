@@ -42,6 +42,21 @@ import random
 import json
 from alive_progress import alive_bar
 pd.options.display.max_rows = 9999
+# from stockstats import StockDataFrame as Sdf
+
+import pandas as pd
+# import matplotlib.pyplot as plt
+#
+# import gym
+# from stable_baselines import PPO2, DDPG, A2C, ACKTR, TD3
+# from stable_baselines import DDPG
+# from stable_baselines import A2C
+# from stable_baselines import SAC
+# from stable_baselines.common.vec_env import DummyVecEnv
+# from stable_baselines.common.policies import MlpPolicy
+
+# import warnings
+# warnings.filterwarnings('ignore')
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -211,6 +226,7 @@ def show_stock_graph(request):
             months = []
             percentchg = []
             colors = []
+            print(historic_yearly)
             for item in historic_monthly.values():
                 print(item['Month'], " ", item['Percent_Change'])
                 if item['Month'] == 1:
@@ -241,9 +257,11 @@ def show_stock_graph(request):
                     color = "#1ab188"
                 elif item['Percent_Change'] < 0:
                     color = "#b92e34"
+                print("test")
                 months.append(month)
                 colors.append(color)
                 percentchg.append(item['Percent_Change'])
+                print("test--")
 
             # Create Candlestick graph from newly created dataframe
             def bar():
@@ -1073,3 +1091,9 @@ def UpdateSector(request):
             print("Failed to update database for table: Sectors")
 
     return render(request, 'update_sector.html')
+
+def testing(request):
+    stockModel = StockJSON.objects.get(ticker="AMZN")
+    data_df = pd.read_json(stockModel.info, orient='index')
+    print(data_df.shape)
+    return render(request, 'update_database.html')

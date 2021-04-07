@@ -58,3 +58,18 @@ form {
 .hide {
     display: none;
 }
+#yo {
+    background-image: url('../images/undraw_Finance_re_gnv2.svg');
+    background-repeat: no-repeat;
+    background-size: 500px auto;
+    background-color: white;
+    background-position: center;
+}
+
+#login-card {
+    border-radius: 10px;
+}
+
+.login-content {
+    padding-top: 16vh;
+    }

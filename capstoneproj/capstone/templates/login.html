@@ -12,19 +12,12 @@
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
   </head>
   <body>
-      <div class="container">
-        <div id="loginForm">
-            <a
-               href="/signup"
-               class="btn btn-primary switchForms">
-               Sign Up
-            </a>
-            <button
-               class="btn btn-primary switchForms active"
-               style="background: rgba(160, 179, 176, 0.25); border: 1px solid rgba(160, 179, 176, 0.25);">
-               Log In
-            </button>
-            <h2 style="padding: 60px 0px 20px 0px; text-align: center">Login Here!</h2>
+  <div id="login-wrapper" class="container-fluid" style="width: 80%; margin-top: 10vh">
+    <div id="login-card" class="row py-3">
+        <div class="col-6" style="background: #13232f; border-radius: 10px 0px 0px 10px; height: 80vh">
+            <div class="login-content">
+            <div id="loginForm" >
+            <h2 style="padding: 60px 0px 20px 0px; text-align: center; color: white">Login</h2>
             {% for message in messages %}
                 {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -49,7 +42,7 @@
                 {% endif %}
             {% endfor %}
           </div>
-          <form method="POST" action="">
+          <form method="POST" action="" style="max-width:70%; margin: auto">
               {% csrf_token %}
               <div class="form-group">
                 <input type="text" class="form-control" name="username">
@@ -59,9 +52,12 @@
               </div>
               <button type="submit" class="btn btn-primary getStarted" name="Create User">Log In</button>
           </form>
-          <a class="nav-link" href="../password-reset/">Forgot Password?</a>
+          <a style="max-width:350px; margin: auto;" class="nav-link" href="../password-reset/">Forgot Password?</a>
+                        </div>
         </div>
-      </div>
-      </div>
+        <div id="yo" class="col-6" style="border-radius: 0px 10px 10px 0px;">
+  </div>
+    </div>
+  </div>
   </body>
 </html>
