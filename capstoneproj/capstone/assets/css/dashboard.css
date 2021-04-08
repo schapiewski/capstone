@@ -230,7 +230,7 @@ label{
   clear: both;
 }
 
-span {
+.span-loader {
   float: left;
   height: 100px;
   line-height: 120px;

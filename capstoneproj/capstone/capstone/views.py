@@ -45,18 +45,25 @@ pd.options.display.max_rows = 9999
 # from stockstats import StockDataFrame as Sdf
 
 import pandas as pd
-# import matplotlib.pyplot as plt
-#
-# import gym
-# from stable_baselines import PPO2, DDPG, A2C, ACKTR, TD3
-# from stable_baselines import DDPG
-# from stable_baselines import A2C
-# from stable_baselines import SAC
-# from stable_baselines.common.vec_env import DummyVecEnv
-# from stable_baselines.common.policies import MlpPolicy
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use('Agg')
+import datetime
 
-# import warnings
-# warnings.filterwarnings('ignore')
+from finrl.config import config
+from finrl.marketdata.yahoodownloader import YahooDownloader
+from finrl.preprocessing.preprocessors import FeatureEngineer
+from finrl.preprocessing.data import data_split
+from finrl.env.env_stocktrading import StockTradingEnv
+from finrl.model.models import DRLAgent
+from finrl.trade.backtest import backtest_stats, backtest_plot
+
+import sys
+sys.path.append("../FinRL-Library")
+
+
+import warnings
+warnings.filterwarnings('ignore')
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -1095,5 +1102,12 @@ def UpdateSector(request):
 def testing(request):
     stockModel = StockJSON.objects.get(ticker="AMZN")
     data_df = pd.read_json(stockModel.info, orient='index')
-    print(data_df.shape)
+    print(data_df.head())
+    data_df_copy = data_df.copy()
+    print(data_df_copy.head())
+    data_df = YahooDownloader(start_date='2009-01-01',
+                              end_date='2021-01-01',
+                              ticker_list=['AAPL']).fetch_data()
+    test = data_df.head()
+    print(test)
     return render(request, 'update_database.html')
