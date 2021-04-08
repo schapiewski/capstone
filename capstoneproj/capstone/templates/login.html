@@ -1,63 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
     <title>login</title>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/login.css' %}">
-  </head>
-  <body>
-  <div id="login-wrapper" class="container-fluid" style="width: 80%; margin-top: 10vh">
+</head>
+<body>
+<div id="login-wrapper" class="container-fluid" style="width: 80%; margin-top: 10vh">
     <div id="login-card" class="row py-3">
-        <div class="col-6" style="background: #13232f; border-radius: 10px 0px 0px 10px; height: 80vh">
+        <div class="col-6" style="background: #13232f; border-radius: 10px 0px 0px 10px; height: 80vh;">
+            <img class="stockz-logo" src="../assets/images/StockZlogo.png">
             <div class="login-content">
-            <div id="loginForm" >
-            <h2 style="padding: 60px 0px 20px 0px; text-align: center; color: white">Login</h2>
-            {% for message in messages %}
-                {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
+                <div id="loginForm">
+                    <h2 style="color: white">Welcome Back, Please login to your account.</h2>
+                    {% for message in messages %}
+                    {% if message.level == DEFAULT_MESSAGE_LEVELS.SUCCESS %}
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    {{message}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                {% endif %}
-                {% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    {{message}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                {% endif %}
-                {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    {{message}}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                {% endif %}
-            {% endfor %}
-          </div>
-          <form method="POST" action="" style="max-width:70%; margin: auto">
-              {% csrf_token %}
-              <div class="form-group">
-                <input type="text" class="form-control" name="username">
-              </div>
-              <div class="form-group">
-                <input type="password" class="form-control"  name="password">
-              </div>
-              <button type="submit" class="btn btn-primary getStarted" name="Create User">Log In</button>
-          </form>
-          <a style="max-width:350px; margin: auto;" class="nav-link" href="../password-reset/">Forgot Password?</a>
+                        {{message}}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        {% endif %}
+                        {% if message.level == DEFAULT_MESSAGE_LEVELS.INFO %}
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            {{message}}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            {% endif %}
+                            {% if message.level == DEFAULT_MESSAGE_LEVELS.ERROR %}
+                            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                {{message}}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                {% endif %}
+                                {% endfor %}
+                            </div>
+                            <form method="POST" action="">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <input type="text" class="form-control" name="username" placeholder="Username">
+                                </div>
+                                <div class="form-group">
+                                    <input type="password" class="form-control" name="password" placeholder="Password">
+                                </div>
+                                <button type="submit" class="btn btn-primary getStarted" name="Create User">Log In
+                                </button>
+                            </form>
+                            <p class="py-3 my-0" style="color: white; text-align: center">Don't have an account? <a class="custom-links" href="../password-reset/">Create an Account</a></p>
+                            <p style="text-align: center"><a class="custom-links" href="../password-reset/">Forgot Password?</a></p>
                         </div>
-        </div>
-        <div id="yo" class="col-6" style="border-radius: 0px 10px 10px 0px;">
-  </div>
-    </div>
-  </div>
-  </body>
+                    </div>
+                    <div class="col-6" style="border-radius: 0px 10px 10px 0px; background: white; padding: 0px; display:flex">
+                        <div id="carouselExampleCaptions" style="margin: auto" class="carousel slide" data-ride="carousel">
+                            <ol class="carousel-indicators">
+                                <li data-target="#carouselExampleCaptions" data-slide-to="0" class="active"></li>
+                                <li data-target="#carouselExampleCaptions" data-slide-to="1"></li>
+                                <li data-target="#carouselExampleCaptions" data-slide-to="2"></li>
+                            </ol>
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="../assets/images/bar_graph.svg" class="d-block w-100" alt="...">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Recommendation System</h5>
+                                        <p>Compare monthly buy/holds against how our recommendation system did!</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="../assets/images/stock_prices.svg" class="d-block w-100" alt="...">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Sector Recommendation</h5>
+                                        <p>Find out top performing sectors with our new sector recommendation system!</p>
+                                    </div>
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="../assets/images/undraw_Finance_re_gnv2.svg" class="d-block w-100" alt="...">
+                                    <div class="carousel-caption d-none d-md-block">
+                                        <h5>Historic Return</h5>
+                                        <p>We show you raw data on how our recommendation system did for the past 10 years.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+</body>
 </html>

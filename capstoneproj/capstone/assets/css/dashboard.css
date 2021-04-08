@@ -1,3 +1,6 @@
+.stockz-logo{
+width:100px
+}
 body {
   font-size: .875rem;
 }
@@ -230,7 +233,7 @@ label{
   clear: both;
 }
 
-span {
+.loader-span {
   float: left;
   height: 100px;
   line-height: 120px;

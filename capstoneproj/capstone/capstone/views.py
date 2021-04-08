@@ -42,21 +42,8 @@ import random
 import json
 from alive_progress import alive_bar
 pd.options.display.max_rows = 9999
-# from stockstats import StockDataFrame as Sdf
 
 import pandas as pd
-# import matplotlib.pyplot as plt
-#
-# import gym
-# from stable_baselines import PPO2, DDPG, A2C, ACKTR, TD3
-# from stable_baselines import DDPG
-# from stable_baselines import A2C
-# from stable_baselines import SAC
-# from stable_baselines.common.vec_env import DummyVecEnv
-# from stable_baselines.common.policies import MlpPolicy
-
-# import warnings
-# warnings.filterwarnings('ignore')
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
