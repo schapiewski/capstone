@@ -1,10 +1,10 @@
 body {
     background: #13232f;
+    background:linear-gradient(0deg, rgba(26, 177, 137, 0.7), rgba(26, 177, 137, 0.7)), url('../images/spikes.png');
 }
 body::after {
   content: "";
-  background:linear-gradient(0deg, rgba(26, 177, 137, 0.7), rgba(26, 177, 137, 0.7)), url('../images/spikes.png');
-    opacity: 0.7;
+  opacity: 0.7;
   top: 0;
   left: 0;
   bottom: 0;
