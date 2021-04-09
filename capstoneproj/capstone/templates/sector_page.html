@@ -46,7 +46,7 @@
                         <form action="{% url 'show_graph' %}" method="Post">
                         {% csrf_token %}
                         <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">
-                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>
+                        <button class="ticker-header show-loading" type="submit">{{ list_item.stock_name}}</button>
                         </form>
                         </td>
                         <td>${{list_item.current_price}}</td>
