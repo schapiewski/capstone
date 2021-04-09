@@ -8,6 +8,8 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
           integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
 
@@ -70,7 +72,7 @@
         </form>
     </div>
 </nav>
-
+    <body>
 <div class="container">
     <br/>
 
@@ -85,7 +87,6 @@
     {% endfor %}
 
     {% endif %}
-    <body>
     <div class="loader-wrapper">
 <div class="loader">
   <span class="loader-span">L</span>
@@ -120,46 +121,8 @@ $(document).ready(function(){
      });
 });
 </script>
-    <div class="container-fluid">
+    <div class="container-fluid" style="min-height: 55vh; padding-bottom: 50px;">
         <div class="row">
-            <!--
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-              <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                  <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'dashboard' %}">
-                      Portfolio
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'updateinfo' %}">
-                      Update Profile
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'password_reset' %}">
-                      Reset Password
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">
-                      Placeholder
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">
-                      Placeholder
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">
-                      Placeholder
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </nav>
-            -->
             <div class="container">
                 {% block content %}
 
@@ -175,5 +138,45 @@ $(document).ready(function() {
     });
 });
     </script>
-    </body>
+</div>
+</body>
+<footer>
+    <div class="container-fluid">
+        <div class="row" style="padding: 50px 50px 0px 50px;">
+            <div class="col-12">
+                <p style="text-align: center">Disclaimer: An investor may get back less than the amount invested.
+                    Information on past performance, where given, is not necessarily a guide to future performance.</p><hr>
+            </div>
+        </div>
+        <div class="row" style="padding: 50px;">
+            <div class="col-lg-3 col-md-6">
+                <img style="max-width:200px" src="../assets/images/StockZlogo.png">
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h4>About StockZ</h4>
+                <p>The stock market can be an intimidating environment for new investors. With hundreds of stocks to
+                    choose from spanning 11 sectors, knowing what to invest in and when can be a difficult task. Our
+                    goal through this project is to provide a user friendly toolset that allows our subscribers to track
+                    various money flows and provide guidance on which stocks to invest in, all while using easy to read
+                    models and statistics.
+                </p>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h4>Site Links</h4>
+                <p><a class="custom-links" href="/../add_stock.html">Portfolio</a></p>
+                <p><a class="custom-links" href="/../pricing">Packages</a></p>
+                <p><a class="custom-links" href="/../sector_page">Sectors</a></p>
+            </div>
+            <div class="col-lg-3 col-md-6" style="padding-top: 24px">
+                <p><a class="custom-links" href="/../updateinfo">Update Profile</a></p>
+                <p><a class="custom-links" href="/../password-reset/">Reset Password</a></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <p style="text-align: center">&copy; StockZ 2021, All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
 </html>

@@ -12,6 +12,9 @@ h1 {
     position: center
 
 }
+* {
+    font-family: 'Poppins', sans-serif;
+}
 /*
  * Update Form
  */
@@ -269,3 +272,18 @@ label{
 .covers span:nth-child(5) { animation-delay: .571428s; }
 .covers span:nth-child(6) { animation-delay: .714285s; }
 .covers span:nth-child(7) { animation-delay: .857142s; }
+
+footer {
+    background-color: #13232F;
+    color: white;
+}
+
+.custom-links {
+    text-decoration: none;
+    color: #1ab188;
+}
+.custom-links:hover {
+    color: #179674;
+    text-decoration: none;
+
+}
