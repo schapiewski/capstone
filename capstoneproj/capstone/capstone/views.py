@@ -212,7 +212,7 @@ def show_stock_graph(request):
             percentchg = []
             colors = []
             print("Recommendation Values")
-            for item in historic_monthly.values():
+            for item in reversed(historic_monthly.values()):
                 print(item['Month'], " ", item['Percent_Change'])
                 if item['Month'] == 1:
                     month = "Jan"
@@ -242,47 +242,47 @@ def show_stock_graph(request):
                     color = "#1ab188"
                 elif item['Percent_Change'] < 0:
                     color = "#b92e34"
-                months.append(month)
-                colors.append(color)
+                months.append(month + " " + str(item['Year']))
+                colors.append('#1ab188')
                 percentchg.append(item['Percent_Change'])
 
             months2 = []
             percentchg2 = []
             colors2 = []
             print("Buy/Hold Values")
-            for item in historic_monthly.values():
-                print(item['Month'], " ", item['Buy_Hold_Change'])
+            for item in reversed(historic_monthly.values()):
+                print(item['Month'], " ", round(item['Buy_Hold_Change'], 2))
                 if item['Month'] == 1:
-                    month = "Jan"
+                    month2 = "Jan"
                 elif item['Month'] == 2:
-                    month = "Feb"
+                    month2 = "Feb"
                 elif item['Month'] == 3:
-                    month = "Mar"
+                    month2 = "Mar"
                 elif item['Month'] == 4:
-                    month = "Apr"
+                    month2 = "Apr"
                 elif item['Month'] == 5:
-                    month = "May"
+                    month2 = "May"
                 elif item['Month'] == 6:
-                    month = "Jun"
+                    month2 = "Jun"
                 elif item['Month'] == 7:
-                    month = "Jul"
+                    month2 = "Jul"
                 elif item['Month'] == 8:
-                    month = "Aug"
+                    month2 = "Aug"
                 elif item['Month'] == 9:
-                    month = "Sep"
+                    month2 = "Sep"
                 elif item['Month'] == 10:
-                    month = "Oct"
+                    month2 = "Oct"
                 elif item['Month'] == 11:
-                    month = "Nov"
+                    month2 = "Nov"
                 elif item['Month'] == 12:
-                    month = "Dec"
+                    month2 = "Dec"
                 if item['Percent_Change'] >= 0:
                     color2 = "#1ab188"
                 elif item['Percent_Change'] < 0:
                     color2 = "#b92e34"
-                months2.append(month)
-                colors2.append(color2)
-                percentchg2.append(item['Buy_Hold_Change'])
+                months2.append(month2)
+                colors2.append('#007bff')
+                percentchg2.append(round(item['Buy_Hold_Change'], 2))
 
 
             # Create Candlestick graph from newly created dataframe
@@ -290,15 +290,24 @@ def show_stock_graph(request):
                 figure = go.Figure(
                     [
                         go.Bar(
+                            name='Recommendation',
                             x=months,
                             y=percentchg,
                             text=percentchg,
                             textposition='auto',
                             marker={'color': colors},
+                        ),
+                        go.Bar(
+                            name='Buy/Hold',
+                            x=months,
+                            y=percentchg2,
+                            text=percentchg2,
+                            textposition='auto',
+                            marker={'color': colors2},
                         )
                     ]
                 )
-                figure.update_layout(title_text='Historic Return Following Our Recommendation System for The Past 12 Months')
+                figure.update_layout(title_text='Recommendation System Historic Return Vs Holding Stock Return')
                 figure.update_yaxes(title_text="Percent Change (%)")
                 figure.update_xaxes(title_text="Month")
                 bar_div = plot(figure, output_type='div')
@@ -846,7 +855,7 @@ def UpdateDatabase(request):
         #monthSumDF2 = beforeList + monthSumDF2 + afterList
         hold_change = np.array(hold_change)
         monthSumDFAllMonths = pd.DataFrame(monthSumDF2, columns=['Year', 'Month', 'Total_Sales', 'Percent_Change'])
-        monthSumDFAllMonths.insert(len(monthSumDFAllMonths.columns), 'Buy_Hold_Change', hold_change[:, 1:])
+        monthSumDFAllMonths.insert(len(monthSumDFAllMonths.columns), 'Buy_Hold_Change', hold_change[:, 1:] * 100)
 
         # df =  buy date, buy price, sell date, sell price, percent change for each sell
         # monthSumDF = dataframe of (year, month, total sales total month change)
@@ -910,7 +919,7 @@ def UpdateDatabase(request):
         year_changeDF = pd.DataFrame(year_change, columns=['Year', 'Percent_Change'])
         year_changeDF = year_changeDF.set_index(year_changeDF['Year'])
         year_changeDF.drop(['Year'], axis=1, inplace=True)
-        year_changeDF.insert(len(year_changeDF.columns), 'Buy_Hold_Change', year_hold_change[:, 1:])
+        year_changeDF.insert(len(year_changeDF.columns), 'Buy_Hold_Change', year_hold_change[:, 1:] * 100)
         return year_changeDF
 
     #calculate ema from closing price values
