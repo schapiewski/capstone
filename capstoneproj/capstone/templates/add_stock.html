@@ -36,7 +36,7 @@
       <th scope="col">Delete</th>
   </tr>
   </thead>
-  <tbody>
+<tbody>
 {% if output %}
 {% if users_stocks %}
             {% for list_item in users_stocks.values %}
@@ -68,13 +68,12 @@
 			</tr>
             {% endfor %}
 
-
-  </tbody>
-</table>
+{% endif %}
+{% endif %}
+            </tbody>
+    </table>
 </div>
-{% endif %}
-{% endif %}
-<script>$(function () {
+    <script>$(function () {
   $('[data-toggle="tooltip"]').tooltip()
 })</script>
 {% endblock %}
