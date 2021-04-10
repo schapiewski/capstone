@@ -28,8 +28,8 @@
       <th scope="col">Ticker</th>
       <th scope="col">Stock Price</th>
       <th scope="col">Previous Close</th>
-      <th scope="col">Market Cap</th>
-      <th scope="col">YTD Change</th>
+      <th scope="col">Market Cap <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="Market cap—or market capitalization—refers to the total value of all a company's shares of stock."></i></th>
+      <th scope="col">YTD Change <i class="fa fa-info-circle" aria-hidden="true" data-toggle="tooltip" data-placement="top" title="A year-to-date figure (YTD) details the total percentage change from January 1 until a date later in the year."></i></th>
       <th scope="col">52Wk High</th>
       <th scope="col">52Wk Low</th>
       <th scope="col">Recommendation</th>
@@ -74,55 +74,7 @@
 </div>
 {% endif %}
 {% endif %}
-
-
-
-
-<!--{% if output %}-->
-<!--{% if users_stocks %}-->
-<!--            {% for list_item in users_stocks %}-->
-<!--            <tr class="fix-hover">-->
-<!--                <th scope="row">-->
-<!--                    <form action="{% url 'show_graph' %}" method="Post">-->
-<!--                        {% csrf_token %}-->
-<!--                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ list_item.ticker}}">-->
-<!--                        <button class="ticker-header" type="submit">{{ list_item.stock_name}}</button>-->
-<!--                    </form>-->
-<!--                </th>-->
-<!--				<td>${{ list_item.current_price }}</td>-->
-<!--				<td>${{ list_item.previous_closing_price }}</td>-->
-<!--				<td>${{ list_item.market_cap }}</td>-->
-<!--				<td>{{ list_item.price_change }}%</td>-->
-<!--				<td>${{ list_item.year_high }}</td>-->
-<!--				<td>${{ list_item.year_low }}</td>-->
-<!--                {% if list_item.recommendation == 'Buy (Hold)' %}-->
-<!--                <td style="color: green">{{index}}</td>-->
-<!--                {% else %}-->
-<!--                <td style="color: red">{{index}}</td>-->
-<!--                {% endif %}-->
-
-<!--			</tr>-->
-<!--            {% endfor %}-->
-
-
-<!--  </tbody>-->
-<!--</table>-->
-<!--</div>-->
-<!--{% endif %}-->
-<!--{% endif %}-->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+<script>$(function () {
+  $('[data-toggle="tooltip"]').tooltip()
+})</script>
 {% endblock %}

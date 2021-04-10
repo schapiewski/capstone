@@ -1,13 +1,17 @@
 {% extends 'base.html' %}
 {% block content %}
-
+{% load mathfilters %}
 <h1>U.S. Sectors & Industries Performance</h1>
 <div class="container">
     <div class="row py-3">
         <div class="col-12">
             <div class="recommendationfunction">
                 <h5 style="color:white;width:40%">Select a Sector for Top Performing Stocks:</h5>
+                {% if user.is_authenticated %}
                 <select name="dropdownplaceholder" id="dropdown" style="width:40%">
+                {% else %}
+                <select name="dropdownplaceholder" id="dropdown" style="width:40%" disabled>
+                    {% endif %}}
                     <option value="placeholder" disabled selected>Select a sector...</option>
                     <option value="communication-services">Communication Services</option>
                     <option value="consumer-cyclical">Consumer Descretionary</option>
@@ -37,9 +41,12 @@
                         <th scope="col">Yearly High</th>
                         <th scope="col">Yearly Low</th>
                     </tr>
+                    {% if user.is_authenticated %}
                     <tr id="placeholder">
                         <td colspan="5">Please select sector from the dropdown...</td>
                     </tr>
+                    {% endif %}
+                    {% if user.is_authenticated %}
                     {% for list_item in ccf_set %}
                     <tr class="consumer-cyclical" style="display:none">
                         <td>
@@ -54,12 +61,15 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
                     </tr>
                     {% endfor %}
+                    {% else %}
+                    <td style="height: 200px; text-align: center;" colspan="6">Please <a class="custom-links" href="/../login">login</a> to view content</td>
+                    {% endif %}
                     {% if ccf_error == "Yes" %}
                     <tr class="consumer-cyclical" style="display:none">
                         <td colspan="5" style="color:red">There are currently not enough stocks in this sector</td>
@@ -79,7 +89,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -104,7 +114,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -129,7 +139,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -154,7 +164,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -179,7 +189,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -204,7 +214,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -229,7 +239,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -254,7 +264,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -279,7 +289,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>
@@ -304,7 +314,7 @@
                         {% if list_item.percentage_change > 0 %}
                             <td style="color: green">+{{list_item.percentage_change}}%</td>
                         {% else %}
-                            <td style="color: red">-{{list_item.percentage_change}}%</td>
+                            <td style="color: red">{{list_item.percentage_change}}%</td>
                         {% endif %}
                         <td>${{list_item.year_high}}</td>
                         <td>${{list_item.year_low}}</td>

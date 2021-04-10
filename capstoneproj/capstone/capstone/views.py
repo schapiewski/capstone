@@ -346,11 +346,14 @@ def show_stock_graph(request):
     else:
         return render(request, 'show_graph.html')
 
-
 def pricing(request):
     context = {}
     current_user = request.user
-    users_stocks_count = len(StockJSON.objects.filter(ownedBy=current_user))
+    print(request.user.is_authenticated)
+    if request.user.is_authenticated:
+        users_stocks_count = len(StockJSON.objects.filter(ownedBy=current_user))
+    else:
+        return render(request, 'pricing.html')
     if request.method == 'POST':
         userPackage = OwnedPackage.objects.get(user=request.user)
         if 'starter_submit' in request.POST:
@@ -381,7 +384,6 @@ def pricing(request):
                 messages.success(request, 'Successfully added Ultimate Package to account')
                 userPackage.save()
                 return redirect('../')
-
     return render(request, 'pricing.html', {'num': OwnedPackage.objects.get(user=request.user).packageNum})
 
 
