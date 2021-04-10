@@ -1,10 +1,10 @@
 body {
     background: #13232f;
+    background:linear-gradient(0deg, rgba(26, 177, 137, 0.7), rgba(26, 177, 137, 0.7)), url('../images/spikes.png');
 }
 body::after {
   content: "";
-  background-image: url('../images/stocks.jpg');
-    opacity: 0.7;
+  opacity: 0.7;
   top: 0;
   left: 0;
   bottom: 0;
@@ -57,4 +57,73 @@ form {
 }
 .hide {
     display: none;
+}
+#yo {
+    background-image: url('../images/undraw_Finance_re_gnv2.svg');
+    background-repeat: no-repeat;
+    background-size: 500px auto;
+    background-color: white;
+    background-position: center;
+}
+
+#login-card {
+    border-radius: 10px;
+}
+
+.login-content {
+    padding-top: 4vh;
+    max-width: 500px;
+    margin: 0 auto;
+}
+#loginForm > h2 {
+    text-align:left;
+    padding: 60px 0px 20px 0px;
+}
+.active {
+    background: white!important;
+    border: none!important;
+}
+.carousel-indicators > li {
+    background: #1ab188;
+    border: 1px solid #1ab188!important;
+}
+
+.carousel-indicators > li.active {
+    background: #1ab188!important;
+    border: 1px solid #1ab188!important;
+    opacity: 1;
+}
+
+.carousel-caption {
+    color: black;
+    position: relative;
+    right: unset;
+    left: unset;
+    bottom: unset;
+    padding-left: 1em;
+    padding-right: 1em;
+}
+.carousel-inner {
+min-height:600px
+}
+
+.carousel-item > img {
+    height: 500px;
+    object-fit: scale-down;
+}
+
+.stockz-logo {
+    padding-left: 4em;
+    padding-top: 10vh;
+    max-width: 200px;
+}
+
+.custom-links {
+    text-decoration: none;
+    color: #1ab188;
+}
+.custom-links:hover {
+    color: #179674;
+    text-decoration: none;
+
 }

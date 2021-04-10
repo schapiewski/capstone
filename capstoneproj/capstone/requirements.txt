@@ -16,6 +16,7 @@ dash-renderer==1.9.0
 dash-table==4.11.2
 Django==3.1.6
 django-crispy-forms==1.11.0
+django-mathfilters==1.0.0
 django-plotly-dash==1.6.1
 dpd-components==0.1.0
 Flask==1.1.2

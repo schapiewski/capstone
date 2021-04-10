@@ -211,6 +211,7 @@ def show_stock_graph(request):
             months = []
             percentchg = []
             colors = []
+            print("Recommendation Values")
             for item in historic_monthly.values():
                 print(item['Month'], " ", item['Percent_Change'])
                 if item['Month'] == 1:
@@ -244,6 +245,45 @@ def show_stock_graph(request):
                 months.append(month)
                 colors.append(color)
                 percentchg.append(item['Percent_Change'])
+
+            months2 = []
+            percentchg2 = []
+            colors2 = []
+            print("Buy/Hold Values")
+            for item in historic_monthly.values():
+                print(item['Month'], " ", item['Buy_Hold_Change'])
+                if item['Month'] == 1:
+                    month = "Jan"
+                elif item['Month'] == 2:
+                    month = "Feb"
+                elif item['Month'] == 3:
+                    month = "Mar"
+                elif item['Month'] == 4:
+                    month = "Apr"
+                elif item['Month'] == 5:
+                    month = "May"
+                elif item['Month'] == 6:
+                    month = "Jun"
+                elif item['Month'] == 7:
+                    month = "Jul"
+                elif item['Month'] == 8:
+                    month = "Aug"
+                elif item['Month'] == 9:
+                    month = "Sep"
+                elif item['Month'] == 10:
+                    month = "Oct"
+                elif item['Month'] == 11:
+                    month = "Nov"
+                elif item['Month'] == 12:
+                    month = "Dec"
+                if item['Percent_Change'] >= 0:
+                    color2 = "#1ab188"
+                elif item['Percent_Change'] < 0:
+                    color2 = "#b92e34"
+                months2.append(month)
+                colors2.append(color2)
+                percentchg2.append(item['Buy_Hold_Change'])
+
 
             # Create Candlestick graph from newly created dataframe
             def bar():

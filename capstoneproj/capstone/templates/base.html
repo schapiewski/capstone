@@ -2,23 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
-          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css"
+          integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" rel="stylesheet">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+    <link href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+          integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" rel="stylesheet">
 
     {% load static %}
     <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 </head>
 
-<nav id="bg-color" class="navbar navbar-expand-lg navbar-dark">
-    <a class="navbar-brand" href="/">StockZ</a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+<nav class="navbar sticky-top navbar-expand-lg navbar-dark" id="bg-color">
+    <a class="navbar-brand" href="/"><img class="stockz-logo" src="../assets/images/StockZlogo.png"></a>
+    <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+            data-target="#navbarSupportedContent" data-toggle="collapse" type="button">
         <span class="navbar-toggler-icon"></span>
     </button>
 
@@ -35,11 +37,11 @@
                 <a class="nav-link" href="{% url 'sector_page' %}">Sectors</a>
             </li>
             <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
-                   aria-haspopup="true" aria-expanded="false">
+                <a aria-expanded="false" aria-haspopup="true" class="nav-link dropdown-toggle" data-toggle="dropdown"
+                   href="#" id="navbarDropdownMenuLink">
                     {{user.username}}
                 </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                <div aria-labelledby="navbarDropdownMenuLink" class="dropdown-menu">
                     <a class="dropdown-item" href="{% url 'updateinfo' %}">Update Profile</a>
                     <a class="dropdown-item" href="{% url 'password_reset' %}">Reset Password</a>
                     <div class="dropdown-divider"></div>
@@ -62,15 +64,15 @@
         <!--      <input class="form-control mr-sm-2" type="search" placeholder="Get Stock Quote" aria-label="Search" name="ticker">-->
         <!--      <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Stock Quote</button>-->
         <!--    </form>-->
-        <form action="{% url 'show_graph' %}" class="form-inline my-2 my-lg-0" method="POST">-->
+        <form action="{% url 'show_graph' %}" class="form-inline my-2 my-lg-0" id="stock-submission" method="POST">-->
             {% csrf_token %}
-            <input class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search"
-                   name="stock">
-            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+            <input aria-label="Search" class="form-control mr-sm-2" name="stock" placeholder="Search Stock..."
+                   type="search">
+            <button class="btn btn-outline-success my-2 my-sm-0 show-loading" type="submit">Search</button>
         </form>
     </div>
 </nav>
-
+    <body>
 <div class="container">
     <br/>
 
@@ -78,54 +80,49 @@
     {% for message in messages %}
     <div class="alert alert-warning alert-dismissible fade show" role="alert">
         {{ message }}
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+        <button aria-label="Close" class="close" data-dismiss="alert" type="button">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     {% endfor %}
 
     {% endif %}
-    <body>
-    <div class="container-fluid">
+    <div class="loader-wrapper">
+<div class="loader">
+  <span class="loader-span">L</span>
+  <span class="loader-span">O</span>
+  <span class="loader-span">A</span>
+  <span class="loader-span">D</span>
+  <span class="loader-span">I</span>
+  <span class="loader-span">N</span>
+  <span class="loader-span">G</span>
+
+  <div class="covers">
+    <span class="loader-span"></span>
+    <span class="loader-span"></span>
+    <span class="loader-span"></span>
+    <span class="loader-span"></span>
+    <span class="loader-span"></span>
+    <span class="loader-span"></span>
+    <span class="loader-span"></span>
+  </div>
+</div>
+</div>
+<script>
+$(window).on("load",function(){
+     $(".loader-wrapper").delay(1000).fadeOut("slow");
+});
+</script>
+<script>
+$(document).ready(function(){
+    $(".show-loading").on("click", function(){
+     $(".loader-wrapper").delay(1000).fadeIn("slow");
+     console.log("test")
+     });
+});
+</script>
+    <div class="container-fluid" style="min-height: 55vh; padding-bottom: 50px;">
         <div class="row">
-            <!--
-            <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
-              <div class="position-sticky pt-3">
-                <ul class="nav flex-column">
-                  <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'dashboard' %}">
-                      Portfolio
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'updateinfo' %}">
-                      Update Profile
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="{% url 'password_reset' %}">
-                      Reset Password
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">
-                      Placeholder
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">
-                      Placeholder
-                    </a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">
-                      Placeholder
-                    </a>
-                  </li>
-                </ul>
-              </div>
-            </nav>
-            -->
             <div class="container">
                 {% block content %}
 
@@ -133,5 +130,53 @@
             </div>
         </div>
     </div>
-    </body>
+    <script>
+$(document).ready(function() {
+    $.each($('.navbar-nav').find('li'), function() {
+        $(this).toggleClass('active',
+            window.location.pathname.indexOf($(this).find('a').attr('href')) > -1);
+    });
+});
+    </script>
+</div>
+</body>
+<footer>
+    <div class="container-fluid">
+        <div class="row" style="padding: 50px 50px 0px 50px;">
+            <div class="col-12">
+                <p style="text-align: center">Disclaimer: An investor may get back less than the amount invested.
+                    Information on past performance, where given, is not necessarily a guide to future performance.</p><hr>
+            </div>
+        </div>
+        <div class="row" style="padding: 50px;">
+            <div class="col-lg-3 col-md-6">
+                <img src="../assets/images/StockZlogo.png" style="max-width:200px">
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h4>About StockZ</h4>
+                <p>The stock market can be an intimidating environment for new investors. With hundreds of stocks to
+                    choose from spanning 11 sectors, knowing what to invest in and when can be a difficult task. Our
+                    goal through this project is to provide a user friendly toolset that allows our subscribers to track
+                    various money flows and provide guidance on which stocks to invest in, all while using easy to read
+                    models and statistics.
+                </p>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <h4>Site Links</h4>
+                <p><a class="custom-links" href="/../add_stock.html">Portfolio</a></p>
+                <p><a class="custom-links" href="/../pricing">Packages</a></p>
+                <p><a class="custom-links" href="/../sector_page">Sectors</a></p>
+            </div>
+            <div class="col-lg-3 col-md-6" style="padding-top: 24px">
+                <p><a class="custom-links" href="/../updateinfo">Update Profile</a></p>
+                <p><a class="custom-links" href="/../password-reset/">Reset Password</a></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <p style="text-align: center">&copy; StockZ 2021, All Rights Reserved.</p>
+            </div>
+        </div>
+    </div>
+</footer>
 </html>
