@@ -42,6 +42,19 @@ import random
 import json
 from alive_progress import alive_bar
 pd.options.display.max_rows = 9999
+import os
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use('Agg')
+import datetime
+
+from finrl.config import config
+from finrl.marketdata.yahoodownloader import YahooDownloader
+from finrl.preprocessing.preprocessors import FeatureEngineer
+from finrl.preprocessing.data import data_split
+from finrl.env.env_stocktrading import StockTradingEnv
+from finrl.model.models import DRLAgent
+from finrl.trade.backtest import backtest_stats, backtest_plot
 
 import pandas as pd
 
@@ -1080,7 +1093,78 @@ def UpdateSector(request):
     return render(request, 'update_sector.html')
 
 def testing(request):
+    # os.makedirs("./" + config.RESULTS_DIR)
     stockModel = StockJSON.objects.get(ticker="AMZN")
     data_df = pd.read_json(stockModel.info, orient='index')
-    print(data_df.shape)
+    data_df = YahooDownloader(start_date='2009-01-01',
+                              end_date='2021-01-01',
+                              ticker_list=['AAPL']).fetch_data()
+    data_df.shape
+    print(data_df.head())
+    tech_indicator_list = config.TECHNICAL_INDICATORS_LIST
+    print(tech_indicator_list)
+    tech_indicator_list = tech_indicator_list + ['kdjk', 'open_2_sma', 'boll', 'close_10.0_le_5_c', 'wr_10', 'dma',
+                                                 'trix']
+    print(tech_indicator_list)
+    fe = FeatureEngineer(
+        use_technical_indicator=True,
+        tech_indicator_list=tech_indicator_list,
+        use_turbulence=False,
+        user_defined_feature=False)
+
+    data_df = fe.preprocess_data(data_df)
+    print(data_df.head())
+    train = data_split(data_df, start='2009-01-01', end='2019-01-01')
+    print("train", train)
+    trade = data_split(data_df, start='2019-01-01', end='2021-01-01')
+    print("trade", trade)
+    len(train.tic.unique())
+    stock_dimension = len(train.tic.unique())
+    state_space = 1 + 2 * stock_dimension + len(config.TECHNICAL_INDICATORS_LIST) * stock_dimension
+    print(f"Stock Dimension: {stock_dimension}, State Space: {state_space}")
+
+    env_kwargs = {
+        "hmax": 1,
+        "initial_amount": 100000,
+        "buy_cost_pct": 0.001,
+        "sell_cost_pct": 0.001,
+        "state_space": state_space,
+        "stock_dim": stock_dimension,
+        "tech_indicator_list": config.TECHNICAL_INDICATORS_LIST,
+        "action_space": stock_dimension,
+        "reward_scaling": 1e-4,
+        "print_verbosity": 10000,
+    }
+
+    e_train_gym = StockTradingEnv(df=train, **env_kwargs)
+    env_train, _ = e_train_gym.get_sb_env()
+    print(type(env_train))
+
+    agent = DRLAgent(env=env_train)
+
+
+    A2C_PARAMS = {"n_steps": 5, "ent_coef": 0.005, "learning_rate": 0.0002}
+    model_a2c = agent.get_model(model_name="a2c", model_kwargs=A2C_PARAMS)
+
+    trained_a2c = agent.train_model(model=model_a2c,
+                                    tb_log_name='a2c',
+                                    total_timesteps=50000)
+    print(trade.head())
+    trade = data_split(data_df, start='2019-01-01', end='2021-01-01')
+
+    e_trade_gym = StockTradingEnv(df=trade, **env_kwargs)
+    env_trade, obs_trade = e_trade_gym.get_sb_env()
+
+    df_account_value, df_actions = DRLAgent.DRL_prediction(model=trained_a2c, environment=e_trade_gym)
+    print(df_account_value, df_actions)
+    print("==============Get Backtest Results===========")
+    now = datetime.datetime.now().strftime('%Y%m%d-%Hh%M')
+
+    # perf_stats_all = backtest_stats(account_value=df_account_value)
+    # perf_stats_all = pd.DataFrame(perf_stats_all)
+    # perf_stats_all.to_csv("./" + config.RESULTS_DIR + "/perf_stats_all_" + now + '.csv')
+    #
+    # print("==============Compare to AAPL itself buy-and-hold===========")
+    # backtest_plot(account_value=df_account_value, baseline_ticker='AMZN', baseline_start='2019-01-01', baseline_end='2021-01-01')
+
     return render(request, 'update_database.html')
