@@ -1074,7 +1074,7 @@ def UpdateDatabase(request):
                 test.historic_yearly = yearly
                 test.info = result
 
-                #test.save()
+                test.save()
                 #print('Updated: ', stockName)
 
             # If stock is NOT created in database, Create that database record
@@ -1091,7 +1091,7 @@ def UpdateDatabase(request):
                                  price_change=priceChange, info=result, historic_monthly=monthly,
                                  historic_yearly=yearly, historic_sales=sales)
                 #print("Saving ", test.stock_name, " to the Database...")
-                #test.save()
+                test.save()
             bar()
     print("Finished")
     return render(request, 'update_database.html')
