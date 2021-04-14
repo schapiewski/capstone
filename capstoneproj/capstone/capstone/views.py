@@ -738,7 +738,7 @@ def UpdateDatabase(request):
                 year_str = str(day.year)
 
                 # first buy
-                if initial_flag and data.loc[day]['Recommendation'] == 'Buy (Hold)':
+                if initial_flag and data.loc[day]['Recommendation'] == 'Buy':
                     buyPrice = data.loc[day]['Close']
                     rowDict['Buy_Date'] = month_str + '/' + day_str + '/' + year_str
                     rowDict['Buy_Price'] = round(buyPrice, 2)
@@ -747,7 +747,7 @@ def UpdateDatabase(request):
                     sold = False
 
                 # if there was a buy just after a sell
-                elif sold and data.loc[day]['Recommendation'] == 'Buy (Hold)' and \
+                elif sold and data.loc[day]['Recommendation'] == 'Buy' and \
                         data.loc[previous]['Recommendation'] == 'Sell':
                     buyPrice = data.loc[day]['Close']
                     rowDict['Buy_Date'] = month_str + '/' + day_str + '/' + year_str
@@ -757,7 +757,7 @@ def UpdateDatabase(request):
 
                 # if there was sell just after a buy
                 elif not sold and data.loc[day]['Recommendation'] == 'Sell' and \
-                        data.loc[previous]['Recommendation'] == 'Buy (Hold)':
+                        (data.loc[previous]['Recommendation'] == 'Buy' or data.loc[previous]['Recommendation'] == 'Hold'):
                     sellPrice = data.loc[day]['Close']
                     rowDict['Sell_Date'] = month_str + '/' + day_str + '/' + year_str
                     rowDict['Sell_Price'] = round(sellPrice, 2)
@@ -836,18 +836,18 @@ def UpdateDatabase(request):
                 year_change.append([current_year, round(sum(change) * 100, 2)])
                 current_year = i
                 change = []
-            if initial_flag and data.loc[i]['Recommendation'] == 'Buy (Hold)':
+            if initial_flag and data.loc[i]['Recommendation'] == 'Buy':
                 current = data.loc[i]['Close']
                 previous = i
                 initial_flag = False
                 sold = False
-            elif sold and data.loc[i]['Recommendation'] == 'Buy (Hold)' and data.loc[previous][
+            elif sold and data.loc[i]['Recommendation'] == 'Buy' and data.loc[previous][
                 'Recommendation'] == 'Sell':
                 current = data.loc[i]['Close']
                 sold = False
                 previous = i
-            elif not sold and data.loc[i]['Recommendation'] == 'Sell' and data.loc[previous][
-                'Recommendation'] == 'Buy (Hold)':
+            elif not sold and data.loc[i]['Recommendation'] == 'Sell' and \
+                    (data.loc[previous]['Recommendation'] == 'Buy' or data.loc[previous]['Recommendation'] == 'Hold'):
                 temp = data.loc[i]['Close']
                 change.append((temp - current) / current)
                 sold = True
@@ -880,6 +880,67 @@ def UpdateDatabase(request):
         # reverse the list from (new...older) to (old...newer)
         return [ele for ele in reversed(macdArray)]
 
+    #machine learning recommendation, using FinRL, returns df of actions
+    def recommendation(data_df, tic):
+        #cleaning and prepping the df
+        data_df = data_df.dropna(axis=0)
+        data_df.insert(len(data_df.columns), 'tic', tic)
+        data_df.drop(columns=['Dividends', 'Stock Splits'], inplace=True)
+        data_df.reset_index(inplace=True)
+        data_df.rename(columns={'Date': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low',
+                              'Close': 'close', 'Volume': 'volume'}, inplace=True)
+
+        #adding a fake day so result isn't off by 1 day
+        data_df = data_df.append(data_df.iloc[-1], ignore_index=True)
+        data_df.loc[len(data_df.index) - 1, 'date'] = \
+            data_df.loc[len(data_df.index) - 1, 'date'] + pd.Timedelta(days=1)
+
+        # building tech indicator list and adding to df using feature engineer
+        tech_indicator_list = config.TECHNICAL_INDICATORS_LIST + \
+                              ['kdjk', 'open_2_sma', 'boll', 'close_10.0_le_5_c', 'wr_10', 'dma', 'trix']
+        fe = FeatureEngineer(use_technical_indicator=True, tech_indicator_list=tech_indicator_list,
+                             use_turbulence=False, user_defined_feature=False)
+        data_df = fe.preprocess_data(data_df)
+
+        # splitting data
+        # train = data_split(train_df, start=str(train_df.loc[0, 'date'].date()),
+        #                    end=str(trade_df.loc[0, 'date'].date()))
+        # trade = data_split(trade_df, start=str(trade_df.loc[0, 'date'].date()),
+        #                    end=str(trade_df.loc[len(trade_df.index) - 1, 'date'].date() + pd.Timedelta(days=1)))
+
+        train = data_df
+        trade = data_df
+
+        # setting env variables and building env
+        stock_dimension = len(train.tic.unique())
+        state_space = 1 + 2 * stock_dimension + len(tech_indicator_list) * stock_dimension
+        env_kwargs = {
+            "hmax": 1,
+            "initial_amount": 100000,
+            "buy_cost_pct": 0.001,
+            "sell_cost_pct": 0.001,
+            "state_space": state_space,
+            "stock_dim": stock_dimension,
+            "tech_indicator_list": tech_indicator_list,
+            "action_space": stock_dimension,
+            "reward_scaling": 1e-4
+        }
+        e_train_gym = StockTradingEnv(df=train, **env_kwargs)
+        env_train, _ = e_train_gym.get_sb_env()
+
+        # building and training model
+        agent = DRLAgent(env=env_train)
+        A2C_PARAMS = {"n_steps": 5, "ent_coef": 0.005, "learning_rate": 0.0002}
+        model_a2c = agent.get_model(model_name="a2c", model_kwargs=A2C_PARAMS)
+        trained_a2c = agent.train_model(model=model_a2c, tb_log_name='a2c', total_timesteps=50000)
+
+        # trading on model
+        e_trade_gym = StockTradingEnv(df=trade, **env_kwargs)
+        df_account_value, df_actions = DRLAgent.DRL_prediction(model=trained_a2c, environment=e_trade_gym)
+        # print(df_account_value, df_actions.head)
+        df_account_value.to_csv('account.csv', index=False)
+        df_actions.to_csv('actions.csv', index=False)
+        return df_actions
     # --------------------------------------------------------------------------------------------------------------#
     # --------------------------------------------------------------------------------------------------------------#
 
@@ -891,6 +952,7 @@ def UpdateDatabase(request):
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)
+            training_df = stockData.copy(deep=True)
             stockInfo = stock.info
 
             stockData = stockData.drop(columns=['Dividends', 'Stock Splits'])
@@ -928,16 +990,34 @@ def UpdateDatabase(request):
             macdSignal_adjusted.extend(macdSignal)
             stockData['MACDSignal'] = macdSignal_adjusted
 
+            #recommendation using finRL output is recommendation for each data 1 = buy, 0 = hold, -1 = sell
+            actions = recommendation(training_df, ticker)
+            actions.set_index('date', inplace=True)
             #finding buy or sell and add to dataframe
+            sellcount = 0
+            buycount = 0
+            holdcount = 0
             for i in stockData.index:
-                if stockData.loc[i, 'MACD'] >= stockData.loc[i, 'MACDSignal']:
-                    stockData.loc[i, 'Recommendation'] = 'Buy (Hold)'
+                date = str(i.date())
+                if date in actions.index:
+                    if actions.loc[date]['actions'][0] == 1:
+                        buycount += 1
+                        stockData.loc[i, 'Recommendation'] = 'Buy'
+                    elif actions.loc[date]['actions'][0] == 0:
+                        holdcount += 1
+                        stockData.loc[i, 'Recommendation'] = 'Hold'
+                    elif actions.loc[date]['actions'][0] == -1:
+                        sellcount += 1
+                        stockData.loc[i, 'Recommendation'] = 'Sell'
                 else:
-                    stockData.loc[i, 'Recommendation'] = 'Sell'
+                    stockData.loc[i, 'Recommendation'] = 'Missing'
+                    print('missing date', date)
+            #print(stockData[2000:])
 
             #dataframes: dateChange = sell day, change for all 12 months
             #monthlyChange = just month, total sells, average percent change for month
             dateChange, monthlyChange = historic_return_monthly(stockData, 12)
+            #print(dateChange.head(50))
 
             #dataframe: (year, percent change)
             yearChange = historic_return_yearly(stockData)
@@ -994,7 +1074,7 @@ def UpdateDatabase(request):
                 test.historic_yearly = yearly
                 test.info = result
 
-                test.save()
+                #test.save()
                 #print('Updated: ', stockName)
 
             # If stock is NOT created in database, Create that database record
@@ -1011,7 +1091,7 @@ def UpdateDatabase(request):
                                  price_change=priceChange, info=result, historic_monthly=monthly,
                                  historic_yearly=yearly, historic_sales=sales)
                 #print("Saving ", test.stock_name, " to the Database...")
-                test.save()
+                #test.save()
             bar()
     print("Finished")
     return render(request, 'update_database.html')
@@ -1095,76 +1175,7 @@ def UpdateSector(request):
 def testing(request):
     # os.makedirs("./" + config.RESULTS_DIR)
     stockModel = StockJSON.objects.get(ticker="AMZN")
-    data_df = pd.read_json(stockModel.info, orient='index')
-    data_df = YahooDownloader(start_date='2009-01-01',
-                              end_date='2021-01-01',
-                              ticker_list=['AAPL']).fetch_data()
-    data_df.shape
-    print(data_df.head())
-    tech_indicator_list = config.TECHNICAL_INDICATORS_LIST
-    print(tech_indicator_list)
-    tech_indicator_list = tech_indicator_list + ['kdjk', 'open_2_sma', 'boll', 'close_10.0_le_5_c', 'wr_10', 'dma',
-                                                 'trix']
-    print(tech_indicator_list)
-    fe = FeatureEngineer(
-        use_technical_indicator=True,
-        tech_indicator_list=tech_indicator_list,
-        use_turbulence=False,
-        user_defined_feature=False)
+    training_df = pd.read_json(stockModel.info, orient='index')
 
-    data_df = fe.preprocess_data(data_df)
-    print(data_df.head())
-    train = data_split(data_df, start='2009-01-01', end='2019-01-01')
-    print("train", train)
-    trade = data_split(data_df, start='2019-01-01', end='2021-01-01')
-    print("trade", trade)
-    len(train.tic.unique())
-    stock_dimension = len(train.tic.unique())
-    state_space = 1 + 2 * stock_dimension + len(config.TECHNICAL_INDICATORS_LIST) * stock_dimension
-    print(f"Stock Dimension: {stock_dimension}, State Space: {state_space}")
-
-    env_kwargs = {
-        "hmax": 1,
-        "initial_amount": 100000,
-        "buy_cost_pct": 0.001,
-        "sell_cost_pct": 0.001,
-        "state_space": state_space,
-        "stock_dim": stock_dimension,
-        "tech_indicator_list": config.TECHNICAL_INDICATORS_LIST,
-        "action_space": stock_dimension,
-        "reward_scaling": 1e-4,
-        "print_verbosity": 10000,
-    }
-
-    e_train_gym = StockTradingEnv(df=train, **env_kwargs)
-    env_train, _ = e_train_gym.get_sb_env()
-    print(type(env_train))
-
-    agent = DRLAgent(env=env_train)
-
-
-    A2C_PARAMS = {"n_steps": 5, "ent_coef": 0.005, "learning_rate": 0.0002}
-    model_a2c = agent.get_model(model_name="a2c", model_kwargs=A2C_PARAMS)
-
-    trained_a2c = agent.train_model(model=model_a2c,
-                                    tb_log_name='a2c',
-                                    total_timesteps=50000)
-    print(trade.head())
-    trade = data_split(data_df, start='2019-01-01', end='2021-01-01')
-
-    e_trade_gym = StockTradingEnv(df=trade, **env_kwargs)
-    env_trade, obs_trade = e_trade_gym.get_sb_env()
-
-    df_account_value, df_actions = DRLAgent.DRL_prediction(model=trained_a2c, environment=e_trade_gym)
-    print(df_account_value, df_actions)
-    print("==============Get Backtest Results===========")
-    now = datetime.datetime.now().strftime('%Y%m%d-%Hh%M')
-
-    # perf_stats_all = backtest_stats(account_value=df_account_value)
-    # perf_stats_all = pd.DataFrame(perf_stats_all)
-    # perf_stats_all.to_csv("./" + config.RESULTS_DIR + "/perf_stats_all_" + now + '.csv')
-    #
-    # print("==============Compare to AAPL itself buy-and-hold===========")
-    # backtest_plot(account_value=df_account_value, baseline_ticker='AMZN', baseline_start='2019-01-01', baseline_end='2021-01-01')
 
     return render(request, 'update_database.html')
