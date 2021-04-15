@@ -882,19 +882,6 @@ def UpdateDatabase(request):
 
     #machine learning recommendation, using FinRL, returns df of actions
     def recommendation(data_df, tic):
-        #cleaning and prepping the df
-        data_df = data_df.dropna(axis=0)
-        data_df.insert(len(data_df.columns), 'tic', tic)
-        data_df.drop(columns=['Dividends', 'Stock Splits'], inplace=True)
-        data_df.reset_index(inplace=True)
-        data_df.rename(columns={'Date': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low',
-                              'Close': 'close', 'Volume': 'volume'}, inplace=True)
-
-        #adding a fake day so result isn't off by 1 day
-        data_df = data_df.append(data_df.iloc[-1], ignore_index=True)
-        data_df.loc[len(data_df.index) - 1, 'date'] = \
-            data_df.loc[len(data_df.index) - 1, 'date'] + pd.Timedelta(days=1)
-
         # building tech indicator list and adding to df using feature engineer
         tech_indicator_list = config.TECHNICAL_INDICATORS_LIST + \
                               ['kdjk', 'open_2_sma', 'boll', 'close_10.0_le_5_c', 'wr_10', 'dma', 'trix']
@@ -908,8 +895,8 @@ def UpdateDatabase(request):
         # trade = data_split(trade_df, start=str(trade_df.loc[0, 'date'].date()),
         #                    end=str(trade_df.loc[len(trade_df.index) - 1, 'date'].date() + pd.Timedelta(days=1)))
 
-        train = data_df
-        trade = data_df
+        train = data_df.copy(deep=True)
+        trade = data_df.copy(deep=True)
 
         # setting env variables and building env
         stock_dimension = len(train.tic.unique())
@@ -949,6 +936,9 @@ def UpdateDatabase(request):
     with alive_bar(len(df)) as bar:
         for index, ticker in df.iterrows():
             #print(ticker)
+            if ticker[0] == 'AMCR':
+                continue
+            print(ticker[0])
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)
@@ -990,6 +980,20 @@ def UpdateDatabase(request):
             macdSignal_adjusted.extend(macdSignal)
             stockData['MACDSignal'] = macdSignal_adjusted
 
+            # print(training_df.head())
+            #prepping df for recommendation
+            training_df = training_df.dropna(axis=0)
+            training_df.insert(len(training_df.columns), 'tic', ticker)
+            training_df.drop(columns=['Dividends', 'Stock Splits'], inplace=True)
+            training_df.reset_index(inplace=True)
+            training_df.rename(columns={'Date': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low',
+                                    'Close': 'close', 'Volume': 'volume'}, inplace=True)
+
+            # adding a fake day so result isn't off by 1 day
+            training_df = training_df.append(training_df.iloc[-1], ignore_index=True)
+            training_df.loc[len(training_df.index) - 1, 'date'] = \
+                training_df.loc[len(training_df.index) - 1, 'date'] + pd.Timedelta(days=1)
+            # training_df.to_csv('training.csv', index=True)
             #recommendation using finRL output is recommendation for each data 1 = buy, 0 = hold, -1 = sell
             actions = recommendation(training_df, ticker)
             actions.set_index('date', inplace=True)
@@ -1012,12 +1016,12 @@ def UpdateDatabase(request):
                 else:
                     stockData.loc[i, 'Recommendation'] = 'Missing'
                     print('missing date', date)
-            #print(stockData[2000:])
+            # print(stockData[2000:])
 
             #dataframes: dateChange = sell day, change for all 12 months
             #monthlyChange = just month, total sells, average percent change for month
             dateChange, monthlyChange = historic_return_monthly(stockData, 12)
-            #print(dateChange.head(50))
+            # print(dateChange.head(50))
 
             #dataframe: (year, percent change)
             yearChange = historic_return_yearly(stockData)
