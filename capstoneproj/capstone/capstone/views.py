@@ -42,6 +42,21 @@ import random
 import json
 from alive_progress import alive_bar
 pd.options.display.max_rows = 9999
+import os
+import matplotlib
+import matplotlib.pyplot as plt
+matplotlib.use('Agg')
+import datetime
+
+from finrl.config import config
+from finrl.marketdata.yahoodownloader import YahooDownloader
+from finrl.preprocessing.preprocessors import FeatureEngineer
+from finrl.preprocessing.data import data_split
+from finrl.env.env_stocktrading import StockTradingEnv
+from finrl.model.models import DRLAgent
+from finrl.trade.backtest import backtest_stats, backtest_plot
+
+import pandas as pd
 
 class VerificationView(View):
     def get(self, request, uidb64, token):
@@ -154,23 +169,6 @@ def logoutUser(request):
 
 
 @login_required(login_url='login')
-def dashboard(request):
-    return render(request, 'dashboard.html')
-    # import requests
-    # import json
-    # if request.method == 'POST':
-    #     tickerModel = request.POST['tickerModel']
-    #     api_request = requests.get("https://cloud.iexapis.com/stable/stock/" + tickerModel + "/quote?token=pk_31a9e3d6616e4a5abbfd6c82edabc089")
-    #     try:
-    #         api = json.loads(api_request.content)
-    #     except Exception as e:
-    #         api = "Error..."
-    #     return render(request, 'dashboard.html', {'api': api})
-    # else:
-    #     return render(request, 'dashboard.html', {'tickerModel': "Enter a tickerModel Symbol Above..."})
-
-
-@login_required(login_url='login')
 def updateinfo(request):
     form = UpdateInfoForm()
     if request.method == 'POST':
@@ -229,6 +227,7 @@ def show_stock_graph(request):
             months = []
             percentchg = []
             colors = []
+
             print("Recommendation Values")
             for item in reversed(historic_monthly.values()):
                 print(item['Month'], " ", item['Percent_Change'])
@@ -260,9 +259,12 @@ def show_stock_graph(request):
                     color = "#1ab188"
                 elif item['Percent_Change'] < 0:
                     color = "#b92e34"
+
                 months.append(month + " " + str(item['Year']))
                 colors.append('#1ab188')
+
                 percentchg.append(item['Percent_Change'])
+                print("test--")
 
             months2 = []
             percentchg2 = []
@@ -804,7 +806,7 @@ def UpdateDatabase(request):
                 prev_month = day
 
                 # first buy
-                if initial_flag and data.loc[day]['Recommendation'] == 'Buy (Hold)':
+                if initial_flag and data.loc[day]['Recommendation'] == 'Buy':
                     buyPrice = data.loc[day]['Close']
                     rowDict['Buy_Date'] = month_str + '/' + day_str + '/' + year_str
                     rowDict['Buy_Price'] = round(buyPrice, 2)
@@ -813,7 +815,7 @@ def UpdateDatabase(request):
                     sold = False
 
                 # if there was a buy just after a sell
-                elif sold and data.loc[day]['Recommendation'] == 'Buy (Hold)' and \
+                elif sold and data.loc[day]['Recommendation'] == 'Buy' and \
                         data.loc[previous]['Recommendation'] == 'Sell':
                     buyPrice = data.loc[day]['Close']
                     rowDict['Buy_Date'] = month_str + '/' + day_str + '/' + year_str
@@ -823,7 +825,7 @@ def UpdateDatabase(request):
 
                 # if there was sell just after a buy
                 elif not sold and data.loc[day]['Recommendation'] == 'Sell' and \
-                        data.loc[previous]['Recommendation'] == 'Buy (Hold)':
+                        (data.loc[previous]['Recommendation'] == 'Buy' or data.loc[previous]['Recommendation'] == 'Hold'):
                     sellPrice = data.loc[day]['Close']
                     rowDict['Sell_Date'] = month_str + '/' + day_str + '/' + year_str
                     rowDict['Sell_Price'] = round(sellPrice, 2)
@@ -915,20 +917,19 @@ def UpdateDatabase(request):
                                     data.loc[current_year]['Close']])
                 current_year = i
                 change = []
-            end_date = i
-
-            if initial_flag and data.loc[i]['Recommendation'] == 'Buy (Hold)':
+            end_date = i #might not need
+            if initial_flag and data.loc[i]['Recommendation'] == 'Buy':
                 current = data.loc[i]['Close']
                 previous = i
                 initial_flag = False
                 sold = False
-            elif sold and data.loc[i]['Recommendation'] == 'Buy (Hold)' and data.loc[previous][
+            elif sold and data.loc[i]['Recommendation'] == 'Buy' and data.loc[previous][
                 'Recommendation'] == 'Sell':
                 current = data.loc[i]['Close']
                 sold = False
                 previous = i
-            elif not sold and data.loc[i]['Recommendation'] == 'Sell' and data.loc[previous][
-                'Recommendation'] == 'Buy (Hold)':
+            elif not sold and data.loc[i]['Recommendation'] == 'Sell' and \
+                    (data.loc[previous]['Recommendation'] == 'Buy' or data.loc[previous]['Recommendation'] == 'Hold'):
                 temp = data.loc[i]['Close']
                 change.append((temp - current) / current)
                 sold = True
@@ -964,6 +965,45 @@ def UpdateDatabase(request):
         # reverse the list from (new...older) to (old...newer)
         return [ele for ele in reversed(macdArray)]
 
+    #machine learning recommendation, using FinRL, returns df of actions
+    def recommendation(data_df, tic):
+        # building tech indicator list and adding to df using feature engineer
+        tech_indicator_list = config.TECHNICAL_INDICATORS_LIST + \
+                              ['kdjk', 'open_2_sma', 'boll', 'close_10.0_le_5_c', 'wr_10', 'dma', 'trix']
+        fe = FeatureEngineer(use_technical_indicator=True, tech_indicator_list=tech_indicator_list,
+                             use_turbulence=False, user_defined_feature=False)
+        data_df = fe.preprocess_data(data_df)
+
+        train = data_df.copy(deep=True)
+        trade = data_df.copy(deep=True)
+
+        # setting env variables and building env
+        stock_dimension = len(train.tic.unique())
+        state_space = 1 + 2 * stock_dimension + len(tech_indicator_list) * stock_dimension
+        env_kwargs = {
+            "hmax": 1,
+            "initial_amount": 100000,
+            "buy_cost_pct": 0.001,
+            "sell_cost_pct": 0.001,
+            "state_space": state_space,
+            "stock_dim": stock_dimension,
+            "tech_indicator_list": tech_indicator_list,
+            "action_space": stock_dimension,
+            "reward_scaling": 1e-4
+        }
+        e_train_gym = StockTradingEnv(df=train, **env_kwargs)
+        env_train, _ = e_train_gym.get_sb_env()
+
+        # building and training model
+        agent = DRLAgent(env=env_train)
+        A2C_PARAMS = {"n_steps": 5, "ent_coef": 0.005, "learning_rate": 0.0002}
+        model_a2c = agent.get_model(model_name="a2c", model_kwargs=A2C_PARAMS)
+        trained_a2c = agent.train_model(model=model_a2c, tb_log_name='a2c', total_timesteps=50000)
+
+        # trading on model
+        e_trade_gym = StockTradingEnv(df=trade, **env_kwargs)
+        df_account_value, df_actions = DRLAgent.DRL_prediction(model=trained_a2c, environment=e_trade_gym)
+        return df_actions
     # --------------------------------------------------------------------------------------------------------------#
     # --------------------------------------------------------------------------------------------------------------#
 
@@ -971,10 +1011,10 @@ def UpdateDatabase(request):
 
     with alive_bar(len(df)) as bar:
         for index, ticker in df.iterrows():
-            #print(ticker)
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)
+            training_df = stockData.copy(deep=True)
             stockInfo = stock.info
 
             stockData = stockData.drop(columns=['Dividends', 'Stock Splits'])
@@ -1012,12 +1052,38 @@ def UpdateDatabase(request):
             macdSignal_adjusted.extend(macdSignal)
             stockData['MACDSignal'] = macdSignal_adjusted
 
+            # print(training_df.head())
+            #prepping df for recommendation
+            training_df = training_df.dropna(axis=0)
+            training_df.insert(len(training_df.columns), 'tic', ticker)
+            training_df.drop(columns=['Dividends', 'Stock Splits'], inplace=True)
+            training_df.reset_index(inplace=True)
+            training_df.rename(columns={'Date': 'date', 'Open': 'open', 'High': 'high', 'Low': 'low',
+                                    'Close': 'close', 'Volume': 'volume'}, inplace=True)
+
+            # adding a fake day so result isn't off by 1 day
+            training_df = training_df.append(training_df.iloc[-1], ignore_index=True)
+            training_df.loc[len(training_df.index) - 1, 'date'] = \
+                training_df.loc[len(training_df.index) - 1, 'date'] + pd.Timedelta(days=1)
+
+            #recommendation using finRL output is recommendation for each data 1 = buy, 0 = hold, -1 = sell
+            actions = recommendation(training_df, ticker)
+            actions.set_index('date', inplace=True)
+
             #finding buy or sell and add to dataframe
             for i in stockData.index:
-                if stockData.loc[i, 'MACD'] >= stockData.loc[i, 'MACDSignal']:
-                    stockData.loc[i, 'Recommendation'] = 'Buy (Hold)'
+                date = str(i.date())
+                if date in actions.index:
+                    if actions.loc[date]['actions'][0] == 1:
+                        stockData.loc[i, 'Recommendation'] = 'Buy'
+                    elif actions.loc[date]['actions'][0] == 0:
+                        stockData.loc[i, 'Recommendation'] = 'Hold'
+                    elif actions.loc[date]['actions'][0] == -1:
+                        stockData.loc[i, 'Recommendation'] = 'Sell'
                 else:
-                    stockData.loc[i, 'Recommendation'] = 'Sell'
+                    stockData.loc[i, 'Recommendation'] = 'Missing'
+                    print('missing date', date)
+            # print(stockData[2000:])
 
             #dataframes: dateChange = sell day, change for all 12 months
             #monthlyChange = just month, total sells, average percent change for month
@@ -1052,11 +1118,6 @@ def UpdateDatabase(request):
             # If stock is already created in database, update that database
             try:
                 test = StockJSON.objects.get(ticker=ticker)
-                #commment this out if an item to be updated
-                # if stockData.index[-1].date() == datetime.datetime.now().date():
-                #     print(ticker, 'is already up to date    ')
-                #     bar()
-                #     continue
                 #print('Updating ', stockName, '...')
                 test.stock_name = stockName
                 test.sector = sector

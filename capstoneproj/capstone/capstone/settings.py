@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 
 INSTALLED_APPS = [
     'capstone',
+    'mathfilters',
     'crispy_forms',
     'mathfilters',
     'django.contrib.admin',

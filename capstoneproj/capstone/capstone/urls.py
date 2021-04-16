@@ -30,9 +30,8 @@ urlpatterns = [
     path('pricing/', views.pricing, name='pricing'),
     path('tutorial/', views.tutorial, name='tutorial'),
     path('stock_list/', views.stock_list, name='stock_list'),
-    #added
     path('sector_page/', views.sectorPage, name='sector_page'),
-    #added
+
     path('update_database/', views.UpdateDatabase, name='update_database'),
     path('update_sector/', views.UpdateSector, name='update_sector'),
     path('add_stock.html', views.add_stock, name="add_stock"),
@@ -42,8 +41,10 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>', auth_views.PasswordResetConfirmView.as_view(template_name='templates/password_reset/password_reset_confirm.html'), name='password_reset_confirm'),
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='templates/password_reset/password_reset_complete.html'), name='password_reset_complete'),
 
+
     path('', views.home, name='home'),
-    path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate")
+    path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate"),
+
 ]
 
 urlpatterns += staticfiles_urlpatterns()
