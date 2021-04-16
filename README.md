@@ -4,17 +4,23 @@
 # Run Project Help
 When grabbing project from github:
 1) Open the project up in IDE
-2) Delete venv folder
-3) Go to file/settings
-4) Go to Project: capstoneproj tab (Left side panel)
-5) Go to Python Interpreter
-6) Click the gear next to python interpreter dropdown
-7) Click Add
-8) Make sure base interpreter is the location of the your python.exe on your computer (Ex: C:\Users\<User>\AppDate\Local\Programs\Python`\`)
-9) Apply changes and hit okay
-10) Then on that same python interpreter screen (file/settings/Project: capstoneproj/)
-11) Click the plus sign on the bottom left and add the following packages:
-12) django, django-crispy-forms, and six (Updated as of 1/25)
+2) Go to file/settings
+3) Go to Project: capstoneproj tab (Left side panel)
+4) Go to Python Interpreter
+5) Click the gear next to python interpreter dropdown
+6) Click Add
+7) Make sure base interpreter is the location of the your python.exe on your computer (Ex: C:\Users\<User>\AppDate\Local\Programs\Python`\`)
+8) Apply changes and hit okay
+9) From the terminal in PyCharm nagivate to venv/scripts
+10) Type activate to activate environment
+11) Then pip install -r <location of requirements.txt>
+12) Still in venv type: git clone https://github.com/openai/gym.git
+14) Then: cd gym
+15) Then: pip install -e .
+16) Finally: pip install finrl
+17) Once all downloads are complete navigate back to capstone\capstoneproj\capstone type: py manage.py runserver
+18) Server should now be running
+
 
 # Setup run from play button (Pycharm)
 1) Right when you open up the project (In pycharm atleast) there is a dropdown right next to the play button
