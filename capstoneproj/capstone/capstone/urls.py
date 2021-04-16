@@ -28,9 +28,9 @@ urlpatterns = [
     path('updateinfo/', views.updateinfo, name='updateinfo'),
     path('show_graph/', views.show_stock_graph, name="show_graph"),
     path('pricing/', views.pricing, name='pricing'),
-    #added
+
     path('sector_page/', views.sectorPage, name='sector_page'),
-    #added
+
     path('update_database/', views.UpdateDatabase, name='update_database'),
     path('update_sector/', views.UpdateSector, name='update_sector'),
     path('add_stock.html', views.add_stock, name="add_stock"),
@@ -42,7 +42,7 @@ urlpatterns = [
 
     path('', views.add_stock, name='dashboard'),
     path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate"),
-    path('testing/', views.testing, name='testing'),
+
 ]
 
 urlpatterns += staticfiles_urlpatterns()

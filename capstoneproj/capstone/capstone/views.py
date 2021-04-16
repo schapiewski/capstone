@@ -926,9 +926,6 @@ def UpdateDatabase(request):
 
     with alive_bar(len(df)) as bar:
         for index, ticker in df.iterrows():
-            #print(ticker)
-            if ticker[0] != 'ROST':
-                continue
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)
@@ -1036,11 +1033,6 @@ def UpdateDatabase(request):
             # If stock is already created in database, update that database
             try:
                 test = StockJSON.objects.get(ticker=ticker)
-                #commment this out if an item to be updated
-                # if stockData.index[-1].date() == datetime.datetime.now().date():
-                #     print(ticker, 'is already up to date    ')
-                #     bar()
-                #     continue
                 #print('Updating ', stockName, '...')
                 test.stock_name = stockName
                 test.sector = sector
@@ -1159,11 +1151,3 @@ def UpdateSector(request):
             print("Failed to update database for table: Sectors")
 
     return render(request, 'update_sector.html')
-
-def testing(request):
-    # os.makedirs("./" + config.RESULTS_DIR)
-    stockModel = StockJSON.objects.get(ticker="AMZN")
-    training_df = pd.read_json(stockModel.info, orient='index')
-
-
-    return render(request, 'update_database.html')
