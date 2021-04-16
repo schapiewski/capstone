@@ -889,12 +889,6 @@ def UpdateDatabase(request):
                              use_turbulence=False, user_defined_feature=False)
         data_df = fe.preprocess_data(data_df)
 
-        # splitting data
-        # train = data_split(train_df, start=str(train_df.loc[0, 'date'].date()),
-        #                    end=str(trade_df.loc[0, 'date'].date()))
-        # trade = data_split(trade_df, start=str(trade_df.loc[0, 'date'].date()),
-        #                    end=str(trade_df.loc[len(trade_df.index) - 1, 'date'].date() + pd.Timedelta(days=1)))
-
         train = data_df.copy(deep=True)
         trade = data_df.copy(deep=True)
 
@@ -924,9 +918,6 @@ def UpdateDatabase(request):
         # trading on model
         e_trade_gym = StockTradingEnv(df=trade, **env_kwargs)
         df_account_value, df_actions = DRLAgent.DRL_prediction(model=trained_a2c, environment=e_trade_gym)
-        # print(df_account_value, df_actions.head)
-        df_account_value.to_csv('account.csv', index=False)
-        df_actions.to_csv('actions.csv', index=False)
         return df_actions
     # --------------------------------------------------------------------------------------------------------------#
     # --------------------------------------------------------------------------------------------------------------#
@@ -936,9 +927,8 @@ def UpdateDatabase(request):
     with alive_bar(len(df)) as bar:
         for index, ticker in df.iterrows():
             #print(ticker)
-            if ticker[0] == 'AMCR':
+            if ticker[0] != 'ROST':
                 continue
-            print(ticker[0])
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)
@@ -993,25 +983,20 @@ def UpdateDatabase(request):
             training_df = training_df.append(training_df.iloc[-1], ignore_index=True)
             training_df.loc[len(training_df.index) - 1, 'date'] = \
                 training_df.loc[len(training_df.index) - 1, 'date'] + pd.Timedelta(days=1)
-            # training_df.to_csv('training.csv', index=True)
+
             #recommendation using finRL output is recommendation for each data 1 = buy, 0 = hold, -1 = sell
             actions = recommendation(training_df, ticker)
             actions.set_index('date', inplace=True)
+
             #finding buy or sell and add to dataframe
-            sellcount = 0
-            buycount = 0
-            holdcount = 0
             for i in stockData.index:
                 date = str(i.date())
                 if date in actions.index:
                     if actions.loc[date]['actions'][0] == 1:
-                        buycount += 1
                         stockData.loc[i, 'Recommendation'] = 'Buy'
                     elif actions.loc[date]['actions'][0] == 0:
-                        holdcount += 1
                         stockData.loc[i, 'Recommendation'] = 'Hold'
                     elif actions.loc[date]['actions'][0] == -1:
-                        sellcount += 1
                         stockData.loc[i, 'Recommendation'] = 'Sell'
                 else:
                     stockData.loc[i, 'Recommendation'] = 'Missing'
@@ -1021,7 +1006,6 @@ def UpdateDatabase(request):
             #dataframes: dateChange = sell day, change for all 12 months
             #monthlyChange = just month, total sells, average percent change for month
             dateChange, monthlyChange = historic_return_monthly(stockData, 12)
-            # print(dateChange.head(50))
 
             #dataframe: (year, percent change)
             yearChange = historic_return_yearly(stockData)
