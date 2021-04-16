@@ -911,13 +911,12 @@ def UpdateDatabase(request):
         for i in data.index:
             if i.year != current_year.year:
                 year_change.append([current_year, round(sum(change) * 100, 2)])
-
                 #current year is first day of the year, end_date is last day of the year
                 year_hold_change.append([current_year, (data.loc[end_date]['Close'] - data.loc[current_year]['Close']) /
                                     data.loc[current_year]['Close']])
                 current_year = i
                 change = []
-            end_date = i #might not need
+            end_date = i
             if initial_flag and data.loc[i]['Recommendation'] == 'Buy':
                 current = data.loc[i]['Close']
                 previous = i
@@ -1011,6 +1010,8 @@ def UpdateDatabase(request):
 
     with alive_bar(len(df)) as bar:
         for index, ticker in df.iterrows():
+            # if ticker[0] != 'GOOGL':
+            #     continue
             ticker = ticker[0]
             stock = yf.Ticker(ticker)
             stockData = stock.history(period='10y', interval='1d', progress=False)

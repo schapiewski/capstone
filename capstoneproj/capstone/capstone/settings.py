@@ -34,7 +34,6 @@ INSTALLED_APPS = [
     'capstone',
     'mathfilters',
     'crispy_forms',
-    'mathfilters',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
