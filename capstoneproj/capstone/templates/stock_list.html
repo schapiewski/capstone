@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid" >
+    <div class="row" style="padding: 50px 0px;">
+        <div class="col-12">
+            <h2 style="color: white;" class="py-3">Recommendation System Supported Stocks</h2>
+            {% for item in Stocks.values %}
+            <div class="stock-list">
+            <p style="color: white; display: inline">{{ item.stock_name }}</p>
+            <form action="{% url 'show_graph' %}" method="Post" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="{{ item.ticker}}">
+                    <button class="ticker-header show-loading" type="submit">({{item.ticker}})</button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

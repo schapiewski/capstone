@@ -65,6 +65,24 @@ class VerificationView(View):
 
         return redirect('login')
 
+def home(request):
+    return render(request, 'home.html')
+
+def tutorial(request):
+    NumOfStocks = len(StockJSON.objects.all())
+    print(NumOfStocks)
+    context = {
+        'NumOfStocks': NumOfStocks
+    }
+    return render(request, 'tutorial.html', context)
+
+def stock_list(request):
+    Stocks = StockJSON.objects.all()
+    print(Stocks)
+    context = {
+        'Stocks': Stocks
+    }
+    return render(request, 'stock_list.html', context)
 
 def register(request):
     form = CreateUserForm()
@@ -723,11 +741,12 @@ def add_stock(request):
         }
     print(package)
     return render(request, 'add_stock.html', context)
+
 def delete_stock(request):
     stockObj = request.GET.get("deleteButton")
     deleter = StockJSON.objects.get(ticker=stockObj)
     deleter.ownedBy.remove(request.user)
-    return redirect('../')
+    return redirect('/../add_stock.html')
 
 def UpdateDatabase(request):
     def human_format(num):

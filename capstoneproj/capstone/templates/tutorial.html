@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container-fluid" >
+    <div class="row" style="padding: 50px 0px;">
+        <div class="col-12">
+            <h1 style="font-size: 34px; font-weight: 600; color: white; padding-top: 20px; text-align: center">Utilize All Our Features!</h1>
+        </div>
+
+    </div>
+    <div class="row" style="padding: 50px 0px;">
+        <div class="col-lg-6 col-md-12 order-sm-2 order-md-2 order-lg-1">
+            <h2 style="color: white; padding-top: 20px">Recommendation System</h2>
+            <p style="color: white">Our recommendation system currently works with {{NumOfStocks}} stocks <a class="custom-links" href="/../stock_list">(see full list)</a>
+                 using the FinRL machine learning method...</p>
+            {% if user.is_authenticated %}
+            <a class="btn btn-primary btn-green mr-4" href="/../add_stock.html">View Page</a>
+            {% else %}
+            <a class="btn btn-secondary" href="/../login">Login Required</a>
+            {% endif %}
+        </div>
+        <div class="col-lg-6 col-md-12 order-sm-1 order-md-1 order-lg-2" >
+            <img src="/../assets/images/stock-recommendation.gif" style="width: 100%"/>
+        </div>
+    </div>
+    <div class="row" style="padding: 50px 0px;">
+        <div class="col-lg-6 col-md-12" >
+            <img src="/../assets/images/sector-recommendation.gif" style="width: 100%"/>
+        </div>
+        <div class="col-lg-6 col-md-12">
+            <h2 style="color: white; padding-top: 20px">Sector Recommendation</h2>
+            <p style="color: white">By webscraping data from Fidelity, we provide you an easy to read
+            format that shows how each sector is currently performing as a whole. Create an account with us to also view the top 3 daily percentage change tickers from each sector.</p>
+            <a class="btn btn-primary btn-green" href="/../sector_page">View Page</a>
+        </div>
+    </div>
+    <div class="row" style="padding: 50px 0px;">
+        <div class="col-lg-6 col-md-12 order-sm-2 order-md-2 order-lg-1">
+            <h2 style="color: white; padding-top: 20px">Historic Return</h2>
+            <p style="color: white">We provide you data on both monthly and yearly returns on our recommendation
+            system in comparison to just buying/holding that particular stock. Search a stock and see how our recommendation system can help you out!</p>
+            <form action="{% url 'show_graph' %}" method="Post">
+                        {% csrf_token %}
+                        <input style="display: none" class="form-control mr-sm-2" type="search" placeholder="Search Stock..." aria-label="Search" name="stock" value="F">
+                        <button class="btn btn-primary btn-green" type="submit">View Page</button>
+            </form>
+        </div>
+        <div class="col-lg-6 col-md-12 order-sm-1 order-md-1 order-lg-2" >
+            <img src="/../assets/images/historic-return.gif" style="width: 100%"/>
+        </div>
+    </div>
+</div>
+<script>
+    $('#tutorial-search').click(function() {
+        $('#tutorial-hint').addClass('search-hint');
+});
+$('.popover-dismiss').popover({
+  trigger: 'focus'
+})
+</script>
+{% endblock %}

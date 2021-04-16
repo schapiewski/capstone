@@ -16,7 +16,6 @@
     {% load static %}
     <link href="{% static 'css/dashboard.css' %}" rel="stylesheet">
 </head>
-
 <nav class="navbar sticky-top navbar-expand-lg navbar-dark" id="bg-color">
     <a class="navbar-brand" href="/"><img class="stockz-logo" src="../assets/images/StockZlogo.png"></a>
     <button aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
@@ -67,8 +66,8 @@
         {% endif%}
         <form action="{% url 'show_graph' %}" class="form-inline my-2 my-lg-0" id="stock-submission" method="POST">-->
             {% csrf_token %}
-            <input aria-label="Search" class="form-control mr-sm-2" name="stock" placeholder="Search Stock..."
-                   type="search">
+            <input id="tutorial-hint" aria-label="Search" class="form-control mr-sm-2" name="stock" placeholder="Search Stock..."
+                   type="search" >
             <button class="btn btn-outline-success my-2 my-sm-0 show-loading" type="submit">Search</button>
         </form>
     </div>
@@ -165,16 +164,25 @@ $(document).ready(function() {
             <div class="col-lg-3 col-md-6">
                 <h4>Site Links</h4>
                 {% if user.is_authenticated %}
+                <p><a class="custom-links" href="/../">Home</a></p>
                 <p><a class="custom-links" href="/../add_stock.html">Portfolio</a></p>
-                {% endif %}
+                <p><a class="custom-links" href="/../pricing">Packages</a></p>
+                <p><a class="custom-links" href="/../tutorial">Tutorial</a></p>
+                {% else %}
+                <p><a class="custom-links" href="/../">Home</a></p>
                 <p><a class="custom-links" href="/../pricing">Packages</a></p>
                 <p><a class="custom-links" href="/../sector_page">Sectors</a></p>
+                <p><a class="custom-links" href="/../tutorial">Tutorial</a></p>
+                {% endif %}
             </div>
             <div class="col-lg-3 col-md-6" style="padding-top: 24px">
                 {% if user.is_authenticated %}
+                <p><a class="custom-links" href="/../sector_page">Sectors</a></p>
+                <p><a class="custom-links" href="/../stock_list">Supported Stocks</a></p>
                 <p><a class="custom-links" href="/../updateinfo">Update Profile</a></p>
                 <p><a class="custom-links" href="/../password-reset/">Reset Password</a></p>
                 {% else %}
+                <p><a class="custom-links" href="/../stock_list">Supported Stocks</a></p>
                 <p><a class="custom-links" href="{% url 'login' %}">Login</a></p>
                 <p><a class="custom-links" href="{% url 'signup' %}">Signup</a></p>
                 {% endif %}

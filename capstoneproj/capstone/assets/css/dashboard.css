@@ -286,3 +286,30 @@ footer {
     color: #179674;
     text-decoration: none;
 }
+
+.btn-green {
+    background: #1ab188!important;
+    border-color: #1ab188!important;
+    opacity: 1;
+}
+
+.btn-green:hover {
+    opacity: 0.9;
+}
+
+.search-hint {
+    border:1px solid red;
+}
+.stock-list{
+    display: block; width: 33.3%; float: left
+}
+@media only screen and (max-width: 992px){
+    .stock-list{
+        width: 50%;
+    }
+}
+@media only screen and (max-width: 768px){
+    .stock-list{
+        width: 100%;
+    }
+}

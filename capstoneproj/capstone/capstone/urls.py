@@ -28,6 +28,8 @@ urlpatterns = [
     path('updateinfo/', views.updateinfo, name='updateinfo'),
     path('show_graph/', views.show_stock_graph, name="show_graph"),
     path('pricing/', views.pricing, name='pricing'),
+    path('tutorial/', views.tutorial, name='tutorial'),
+    path('stock_list/', views.stock_list, name='stock_list'),
     #added
     path('sector_page/', views.sectorPage, name='sector_page'),
     #added
@@ -40,7 +42,7 @@ urlpatterns = [
     path('password-reset-confirm/<uidb64>/<token>', auth_views.PasswordResetConfirmView.as_view(template_name='templates/password_reset/password_reset_confirm.html'), name='password_reset_confirm'),
     path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='templates/password_reset/password_reset_complete.html'), name='password_reset_complete'),
 
-    path('', views.add_stock, name='dashboard'),
+    path('', views.home, name='home'),
     path('activate/<uidb64>/<token>', VerificationView.as_view(), name="activate")
 ]
 
