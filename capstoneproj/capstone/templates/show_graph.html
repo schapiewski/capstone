@@ -204,7 +204,10 @@
                                 <thead class="thead-light">
                                 <tr>
                                     <th scope="col">Year</th>
-                                    <th scope="col">Total Percent Change</th>
+                                    <th scope="col">Recommendation Percent Change</th>
+                                    <th scope="col">Buy/Hold Percent Change</th>
+                                    <th scope="col">+/-</th>
+
                                 </tr>
                                 </thead>
                                 {% for key, item in historic_yearly.items reversed %}
@@ -216,6 +219,16 @@
                                     <td style="color: green">+{{item.Percent_Change|floatformat:2}}%</td>
                                     {% else %}
                                     <td style="color: red">{{item.Percent_Change|floatformat:2}}%</td>
+                                    {% endif %}
+                                    {% if item.Buy_Hold_Change > 0 %}
+                                    <td style="color: green">+{{item.Buy_Hold_Change|floatformat:2}}%</td>
+                                    {% else %}
+                                    <td style="color: red">{{item.Buy_Hold_Change|floatformat:2}}%</td>
+                                    {% endif %}
+                                    {% if item.Percent_Change|sub:item.Buy_Hold_Change > 0 %}
+                                    <td style="color: green">+{{item.Percent_Change|sub:item.Buy_Hold_Change|floatformat:2}}%</td>
+                                    {% else %}
+                                    <td style="color: red">{{item.Percent_Change|sub:item.Buy_Hold_Change|floatformat:2}}%</td>
                                     {% endif %}
                                 </tr>
                                 </tbody>
